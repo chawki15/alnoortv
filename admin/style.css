@@ -1,0 +1,69 @@
+.list {
+  display: flex;
+}
+.list .group-image {
+  margin: 5px;
+  height: 200px;
+  width: 200px;
+  display: flex;
+  border: 1px dashed grey;
+  background-color: lightgrey;
+  justify-content: center;
+  align-items: center;
+  border-radius: 15px;
+  background-position: center;
+  background-size: cover;
+}
+.list .group-image input[type="file"] {
+  display: none;
+}
+.list .group-image .description {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+.list .group-image .description label {
+  margin-top: 10px;
+  cursor: pointer;
+  border: 1px solid black;
+  padding: 20px;
+  border-radius: 50%;
+  transition: all 100ms;
+}
+.list .group-image .description label:hover {
+  background-color: black;
+  color: white;
+}
+.list .group-image .description label i {
+  font-size: 3em;
+}
+.list .group-image .close {
+  display: none;
+  opacity: 0;
+  transition: 100ms;
+  border-radius: 50%;
+}
+.list .group-image .close span {
+  transition: all 100ms;
+  color: red;
+}
+.list .group-image .close span i {
+  font-size: 3em;
+  cursor: pointer;
+}
+.list .group-image:hover .close {
+  display: flex;
+  opacity: 1;
+}
+.list .afficher .description {
+  display: none;
+}
+.list .afficher .close {
+  display: flex;
+}
+.list .afficher .close span {
+  display: flex;
+}

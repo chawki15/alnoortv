@@ -1,0 +1,63 @@
+.slick-arrow {
+  font-size: 0;
+  position: absolute;
+  top: 95px;
+  z-index: 1;
+}
+.slick-arrow:before {
+  content: "\eA14";
+  display: inline-block;
+  vertical-align: middle;
+  font-family: "iconFont";
+  -webkit-font-smoothing: antialiased;
+  font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-shadow: 0 0 0 transparent;
+  speak: none;
+  font-style: normal;
+  font-weight: 400;
+  font-variant: normal;
+  text-transform: none;
+  font-size: 36px;
+  color: #00c4ff;
+  transition: all 0.25s;
+}
+.slick-arrow.slick-next {
+  left: -50px;
+}
+
+@media (max-width: 1400px) {
+  .slick-arrow.slick-next {
+    left: 20px;
+  }
+}
+.slick-arrow.slick-next:before {
+  transform: rotate(180deg);
+}
+
+@media (min-width: 600px) {
+  .slick-arrow.slick-next:hover:before {
+    transform: translateX(-5px) rotate(180deg);
+  }
+}
+.slick-arrow.slick-prev {
+  right: -50px;
+}
+
+@media (max-width: 1400px) {
+  .slick-arrow.slick-prev {
+    right: 20px;
+  }
+}
+
+@media (min-width: 600px) {
+  .slick-arrow.slick-prev:hover:before {
+    transform: translateX(5px);
+  }
+}
+
+button {
+  border: 0;
+  padding: 0;
+  background: 0 0;
+}

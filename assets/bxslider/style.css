@@ -1,0 +1,146 @@
+/* Other ratios */
+* {
+  margin: 0;
+  padding: 0;
+}
+html {
+  font-size: 100.01%;
+}
+body {
+  font-size: 62.5%;
+  font-family: Arial, sans-serif;
+}
+html,
+body {
+  height: 100%;
+}
+@font-face {
+  font-family: "icon-fonts";
+  src: url("../css/fonts/icon-fonts.woff");
+  src: url("../css/fonts/icon-fonts.woff") format("woff"),
+    url("../css/fonts/icon-fonts.woff") format("truetype"),
+    url("../css/fonts/icon-fonts.woff") format("svg");
+  font-weight: normal;
+  font-style: normal;
+}
+.photo-tape_header .photo-tape_link-back {
+  position: relative;
+  background: none rgba(221, 221, 221, 0.5);
+}
+.photo-tape_header .photo-tape_link-back:after {
+  content: "\e810";
+  font-family: "icon-fonts";
+  position: absolute;
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  text-align: center;
+  top: 0;
+  left: 0;
+  font-size: 17px;
+  color: #000;
+}
+.b-layout {
+  height: auto !important;
+  height: 100%;
+  min-height: 100%;
+  position: relative;
+  overflow: hidden;
+  min-width: 300px;
+  background-color: #303030;
+}
+.heading {
+  font-size: 1.8em;
+  margin: 0 0 0.7em;
+}
+.photoViewer {
+  overflow-y: scroll;
+}
+
+.photoViewer .b-layout {
+  min-width: 0;
+  height: 100% !important;
+  overflow: visible;
+  min-height: 0;
+}
+.photo-tape {
+  background: #000;
+  min-height: 100%;
+  height: auto;
+  position: relative;
+  overflow: hidden;
+}
+.photo-tape .right-section {
+  margin: 0 0 0 4px;
+}
+.photo-tape_header {
+  border-bottom: 2px solid #d8d8d8;
+  color: #fff;
+}
+.photo-tape_header .wrapper {
+  padding: 20px 25px 20px 20px;
+  overflow: hidden;
+}
+.photo-tape_header .photo-tape_link-back {
+  float: left;
+  width: 44px;
+  height: 44px;
+  border: none;
+  outline: none;
+}
+.photo-tape_header .heading {
+  font-size: 2em;
+  margin: 5px 0 0 60px;
+  color: #fefefe;
+  font-family: 'Kalligraaf Arabic Medium';
+  line-height: 150%;
+}
+.photo-tape_header .summary {
+  font-size: 1.2em;
+  margin: 5px 0 0 0;
+  color: #fff;
+  font-family: 'Kalligraaf Arabic Light';
+}
+.photo-area {
+  position: relative;
+}
+.container {
+  margin: 12px auto;
+}
+#container_3 {
+  width: 100%;
+}
+.photo-thumbs {
+  margin: 0 auto;
+}
+.photo-thumbs ul {
+  text-align: center;
+}
+.photo-thumbs li {
+  list-style: none;
+  display: inline-block;
+  vertical-align: top;
+  width: 46px;
+  height: 46px;
+  margin: 0 0 4px 3px;
+  border: 2px solid #000;
+  overflow: hidden;
+}
+.photo-thumbs img {
+  display: block;
+  height: 100%;
+  width: auto;
+}
+.photo-area .bx-wrapper {
+  width: 960px;
+  height: auto;
+  margin: 0 auto;
+  padding-bottom: 17px;
+  overflow: hidden;
+  text-align: -webkit-center;
+}
+.bxslider img {
+  max-width: 100%;
+  max-height: 100%;
+  display: block;
+}
