@@ -1,17 +1,19 @@
 ﻿<?php
 
-function connect()
+function connect_pdo()
 {
-	
-	//$s = 'localhost'; $l = 'alnoortv_alnoortv'; $p = 'KjDijJX*i%TS'; $db = 'alnoortv_chawki';
 	$s = 'localhost'; $l = 'root'; $p = ''; $db = 'nourtv';
-	
-	$link = mysqli_connect($s,$l,$p,$db) or die('SERVER');
-	mysqli_set_charset($link,"utf8");
-	
-	return $link;
+	$dsn = "mysql:host={$s};dbname={$db};charset=utf8mb4";
+	try {
+		return new PDO($dsn, $l, $p, [
+			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+			PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+			PDO::ATTR_EMULATE_PREPARES => false,
+		]);
+	} catch (PDOException $e) {
+		die('SERVER');
+	}
 }
-
 
 function curPageName() 
 {
@@ -103,8 +105,14 @@ endif;
 
 function exist($db,$champ,$val,$tab)
 {	
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT * FROM '.$tab.' WHERE '.$champ.' = "'.$val.'"'));	
-	if($d[$champ]==''): return false;
+	if($db instanceof PDO){
+		$stmt = $db->prepare('SELECT '.$champ.' FROM '.$tab.' WHERE '.$champ.' = :val LIMIT 1');
+		$stmt->execute([':val' => $val]);
+		$d = $stmt->fetch();
+	}else{
+		$d = mysqli_fetch_array(mysqli_query($db,'SELECT * FROM '.$tab.' WHERE '.$champ.' = "'.$val.'"'));
+	}
+	if(empty($d[$champ])): return false;
 		else: return true;
 	endif;
 }
@@ -150,37 +158,92 @@ function Get_current_page()
 	return $currentpage;
 }
 
+function get_admin_by_id($db, $id)
+{
+    $stmt = $db->prepare('SELECT id, name, email, password, active FROM admin WHERE id = :id LIMIT 1');
+    $stmt->execute([':id' => (int)$id]);
+    $admin = $stmt->fetch();
+    return $admin ?: null;
+}
+
+function get_admin_by_email($db, $email)
+{
+    $stmt = $db->prepare('SELECT id, name, email, password, active FROM admin WHERE email = :email LIMIT 1');
+    $stmt->execute([':email' => $email]);
+    $admin = $stmt->fetch();
+    return $admin ?: null;
+}
+
+function verify_admin_password($db, $admin, $plainPassword)
+{
+    if (!$admin || !isset($admin['password'])) {
+        return false;
+    }
+
+    $hash = (string)$admin['password'];
+    $ok = false;
+
+    if (preg_match('/^\$2y\$/', $hash) || preg_match('/^\$argon2/i', $hash)) {
+        $ok = password_verify($plainPassword, $hash);
+    } else {
+        $ok = hash_equals($hash, md5($plainPassword));
+        if ($ok) {
+            $newHash = password_hash($plainPassword, PASSWORD_DEFAULT);
+            $stmt = $db->prepare('UPDATE admin SET password = :password WHERE id = :id');
+            $stmt->execute([':password' => $newHash, ':id' => (int)$admin['id']]);
+        }
+    }
+
+    return $ok;
+}
+
+function create_admin_user($db, $name, $email, $hash)
+{
+    $stmt = $db->prepare('INSERT INTO admin(id,name,email,password,active) VALUES (NULL,:name,:email,:password,0)');
+    return $stmt->execute([
+        ':name' => $name,
+        ':email' => $email,
+        ':password' => $hash,
+    ]);
+}
+
 function GetIdUser($db)
 {
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT * FROM admin WHERE MD5(id) = "'.$_SESSION['login_admin'].'"'));
-	if($d['id']!='') return $d['id'];
-	else return false;
+	if(!isset($_SESSION['admin_id']) || !validate_numeric((string)$_SESSION['admin_id'])) return false;
+	$admin = get_admin_by_id($db, (int)$_SESSION['admin_id']);
+	if($admin && isset($admin['id'])) return (int)$admin['id'];
+	return false;
 }
 
 function loggedAdmin($db)
 {
-  if(isset($_SESSION['login_admin'])){
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT * FROM admin WHERE MD5(id) = "'.$_SESSION['login_admin'].'" and active = 1'));
-	if($d['id']!='') return true;
+  if(isset($_SESSION['admin_id']) && validate_numeric((string)$_SESSION['admin_id'])){
+	$admin = get_admin_by_id($db, (int)$_SESSION['admin_id']);
+	if($admin && (int)$admin['active'] === 1) return true;
 	else return false;
   }
 }
 
 function logged($db)
 {
-  if(isset($_SESSION['login_admin'])){
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT * FROM admin WHERE MD5(id) = "'.$_SESSION['login_admin'].'" and active = 0'));
-	if($d['id']!='') return true;
+  if(isset($_SESSION['admin_id']) && validate_numeric((string)$_SESSION['admin_id'])){
+	$admin = get_admin_by_id($db, (int)$_SESSION['admin_id']);
+	if($admin && (int)$admin['active'] === 0) return true;
 	else return false;
   }
 }
 
 function GetTableByID($db,$table,$champ,$val)
 {
-	$q = mysqli_query($db,'SELECT '.$champ.' FROM '.$table.' WHERE id = "'.$val.'"');
-	$d = mysqli_fetch_array($q);
-		
-	return $d[$champ];
+	if($db instanceof PDO){
+		$stmt = $db->prepare('SELECT '.$champ.' FROM '.$table.' WHERE id = :id LIMIT 1');
+		$stmt->execute([':id' => $val]);
+		$d = $stmt->fetch();
+	}else{
+		$q = mysqli_query($db,'SELECT '.$champ.' FROM '.$table.' WHERE id = "'.$val.'"');
+		$d = mysqli_fetch_array($q);
+	}
+	return isset($d[$champ]) ? $d[$champ] : null;
 }
 
 function arabicDate($time)
@@ -248,46 +311,70 @@ function HeureCh($date)
 	endif;
 }
 
-function generate_image_thumbnail($source_image_path, $thumbnail_image_path,$w,$h)
+function news_image_name($photo, $size = 1200)
 {
-    list($source_image_width, $source_image_height, $source_image_type) = getimagesize($source_image_path);
-    switch ($source_image_type) {
-        case IMAGETYPE_GIF:
-            $source_gd_image = imagecreatefromgif($source_image_path);
-            break;
-        case IMAGETYPE_JPEG:
-            $source_gd_image = imagecreatefromjpeg($source_image_path);
-            break;
-        case IMAGETYPE_PNG:
-            $source_gd_image = imagecreatefrompng($source_image_path);
-            break;
+    $photo = trim((string)$photo);
+    if ($photo === '') {
+        return '';
     }
-    if ($source_gd_image === false) {
-        return false;
+
+    $size = (int)$size;
+    $baseDir = __DIR__ . '/../../assets/img/news/';
+
+    if (strpos($photo, '.') !== false) {
+        $info = pathinfo($photo);
+        $name = $info['filename'] ?? $photo;
+        $ext = strtolower($info['extension'] ?? '');
+
+        if (preg_match('/-(300|600|1200)$/', $name)) {
+            $root = preg_replace('/-(300|600|1200)$/', '', $name);
+            $candidates = [
+                $photo,
+                $root . '-' . $size . '.webp',
+                $root . '-' . $size . '.jpg',
+                $root . '-' . $size . '.jpeg',
+                $root . '-' . $size . '.png',
+            ];
+            foreach ($candidates as $candidate) {
+                if (is_file($baseDir . $candidate)) {
+                    return $candidate;
+                }
+            }
+            return $photo;
+        }
+
+        if (is_file($baseDir . $photo)) {
+            return $photo;
+        }
+
+        $fallback = $name . '-' . $size . '.webp';
+        if (is_file($baseDir . $fallback)) {
+            return $fallback;
+        }
+
+        return $name . ($ext !== '' ? '.' . $ext : '');
     }
-    $source_aspect_ratio = $source_image_width / $source_image_height;
-    $thumbnail_aspect_ratio = $w / $h;
-    if ($source_image_width <= $w && $source_image_height <= $h) {
-        $thumbnail_image_width = $source_image_width;
-        $thumbnail_image_height = $source_image_height;
-    } elseif ($thumbnail_aspect_ratio > $source_aspect_ratio) {
-        $thumbnail_image_width = (int) ($h * $source_aspect_ratio);
-        $thumbnail_image_height = $h;
-    } else {
-        $thumbnail_image_width = $w;
-        $thumbnail_image_height = (int) ($w / $source_aspect_ratio);
+
+    foreach (['webp', 'jpg', 'jpeg', 'png'] as $ext) {
+        $candidate = $photo . '-' . $size . '.' . $ext;
+        if (is_file($baseDir . $candidate)) {
+            return $candidate;
+        }
     }
-    $thumbnail_gd_image = imagecreatetruecolor($thumbnail_image_width, $thumbnail_image_height);
-    imagecopyresampled($thumbnail_gd_image, $source_gd_image, 0, 0, 0, 0, $thumbnail_image_width, $thumbnail_image_height, $source_image_width, $source_image_height);
-    $img_disp = imagecreatetruecolor($w,$h);
-    $backcolor = imagecolorallocate($img_disp,0x00, 0x00, 0x00);
-    imagefill($img_disp,0,0,$backcolor);
-    imagecopy($img_disp, $thumbnail_gd_image, (imagesx($img_disp)/2)-(imagesx($thumbnail_gd_image)/2), (imagesy($img_disp)/2)-(imagesy($thumbnail_gd_image)/2), 0, 0, imagesx($thumbnail_gd_image), imagesy($thumbnail_gd_image));
-    imagejpeg($img_disp, $thumbnail_image_path, 60);
-    imagedestroy($source_gd_image);
-    imagedestroy($thumbnail_gd_image);
-    imagedestroy($img_disp);
-    return true;
+
+    foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+        $candidate = $photo . '.' . $ext;
+        if (is_file($baseDir . $candidate)) {
+            return $candidate;
+        }
+    }
+
+    return $photo . '-' . $size . '.webp';
+}
+
+function news_image_path($photo, $size = 1200)
+{
+    return 'assets/img/news/' . news_image_name($photo, $size);
 }
 
 /*------------ SITE ------------*/
@@ -299,7 +386,7 @@ function GetFunfNews($db,$i)
 		{
 			$id[] = $d['id'];
 			$titre[] = $d['titre'];
-			$photo[] = $d['photo'];
+			$photo[] = news_image_name($d['photo'], 1200);
 			$date[] = $d['date'];
 		}
 	return array($id,$titre,$photo,$date);	
@@ -312,7 +399,7 @@ function GetZweiNews($db,$i)
 		{
 			$id[] = $d['id'];
 			$titre[] = $d['titre'];
-			$photo[] = $d['photo'];
+			$photo[] = news_image_name($d['photo'], 1200);
 			$date[] = $d['date'];
 		}
 	return array($id,$titre,$photo,$date);	
@@ -340,7 +427,7 @@ function GetLatestNews($db){
 	{
 		$id[] = $d['id'];
 		$titre[] = $d['titre'];
-		$photo[] = $d['photo'];
+		$photo[] = news_image_name($d['photo'], 1200);
 		$date[] = $d['date'];
 	}
 	return array($id,$titre,$photo,$date);				
@@ -391,7 +478,7 @@ function MostWatchedDay($db){
 	{
 		$id[] = $d['id'];
 		$titre[] = $d['titre'];
-		$photo[] = $d['photo'];
+		$photo[] = news_image_name($d['photo'], 1200);
 		$nVues[] = $d['nVues'];
 	}
 	return array($id,$titre,$photo,$nVues);				
@@ -403,7 +490,7 @@ function  Last24hours($db){
 	{
 		$id[] = $d['id'];
 		$titre[] = $d['titre'];
-		$photo[] = $d['photo'];
+		$photo[] = news_image_name($d['photo'], 1200);
 		$nVues[] = $d['nVues'];
 		$date[] = $d['date'];
 	}
@@ -417,7 +504,7 @@ function MostWatchedWeek($db){
 	{
 		$id[] = $d['id'];
 		$titre[] = $d['titre'];
-		$photo[] = $d['photo'];
+		$photo[] = news_image_name($d['photo'], 1200);
 		$nVues[] = $d['nVues'];
 	}
 	return array($id,$titre,$photo,$nVues);				
@@ -429,7 +516,7 @@ function MostWatched($db){
 	{
 		$id[] = $d['id'];
 		$titre[] = $d['titre'];
-		$photo[] = $d['photo'];
+		$photo[] = news_image_name($d['photo'], 1200);
 		$nVues[] = $d['nVues'];
 	}
 	return array($id,$titre,$photo,$nVues);				
@@ -442,7 +529,7 @@ function GetVideo($db)
 		{
 			$id[] = $d['id'];
 			$titre[] = $d['titre'];
-			$photo[] = $d['photo'];
+			$photo[] = news_image_name($d['photo'], 1200);
 			$url[] = $d['urlVideo'];
 		}
 	return array($id,$titre,$photo,$url);	
@@ -456,20 +543,36 @@ function GetTotalVideo($db)
 
 function GetSousMenuByMenu($db,$ids)
 {
-	$q1 = mysqli_query($db,'SELECT * FROM sous_categories where id_category ="'.$ids.'"');
-	while ($m = mysqli_fetch_array($q1)) 
-		{
+	$idss = []; $idcats = []; $nom = [];
+	if($db instanceof PDO){
+		$stmt = $db->prepare('SELECT * FROM sous_categories WHERE id_category = :id_category');
+		$stmt->execute([':id_category' => (int)$ids]);
+		while ($m = $stmt->fetch()) {
 			$idss[] = $m['id'];
 			$idcats[] = $m['id_category'];
 			$nom[] = $m['name'];
-		}	
+		}
+	}else{
+		$q1 = mysqli_query($db,'SELECT * FROM sous_categories where id_category ="'.$ids.'"');
+		while ($m = mysqli_fetch_array($q1)) {
+			$idss[] = $m['id'];
+			$idcats[] = $m['id_category'];
+			$nom[] = $m['name'];
+		}
+	}	
 	return array($idss,$idcats,$nom);
 }
 
 function CountSousMenuByMenu($db,$ids)
 {
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT count(*) as nbr FROM sous_categories where id_category ="'.$ids.'"'));
-	return $d['nbr'];
+	if($db instanceof PDO){
+		$stmt = $db->prepare('SELECT count(*) as nbr FROM sous_categories WHERE id_category = :id_category');
+		$stmt->execute([':id_category' => (int)$ids]);
+		$d = $stmt->fetch();
+	}else{
+		$d = mysqli_fetch_array(mysqli_query($db,'SELECT count(*) as nbr FROM sous_categories where id_category ="'.$ids.'"'));
+	}
+	return (int)($d['nbr'] ?? 0);
 }
 
 function GetAdminMenu($db)
@@ -488,44 +591,76 @@ function GetAdminMenu($db)
 
 function GetAdminCategories($db)
 {
-    $q = mysqli_query($db,'SELECT * FROM categories');
-		while ($d = mysqli_fetch_array($q)) 
-		{
+    $id = []; $name = [];
+    if($db instanceof PDO){
+		$q = $db->query('SELECT * FROM categories');
+		while ($d = $q->fetch()) {
+			$id[] = $d['id'];
+			$name[] = $d['name'];
+			}
+		}else{
+		$q = mysqli_query($db,'SELECT * FROM categories');
+		while ($d = mysqli_fetch_array($q)) {
 			$id[] = $d['id'];
 			$name[] = $d['name'];
 		}
-		
-		return array($id,$name);	
+	}
+	return array($id,$name);	
 }
 
 function GetAdminSousMenu($db)
 {
-	$q = mysqli_query($db,'SELECT * FROM sous_categories');
-	while ($d = mysqli_fetch_array($q)) 
-		{
+	$id = []; $idcat = []; $name = [];
+	if($db instanceof PDO){
+		$q = $db->query('SELECT * FROM sous_categories');
+		while ($d = $q->fetch()) {
 			$id[] = $d['id'];
 			$idcat[] = $d['id_category'];
 			$name[] = $d['name'];
-		}	
+		}
+	}else{
+		$q = mysqli_query($db,'SELECT * FROM sous_categories');
+		while ($d = mysqli_fetch_array($q)) {
+			$id[] = $d['id'];
+			$idcat[] = $d['id_category'];
+			$name[] = $d['name'];
+		}
+	}	
 	return array($id,$idcat,$name);
 }
 
 function GetAdminNews($db,$a)
 {
-	if($a =='1'){
-		$q = mysqli_query($db,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") order by id desc');
-	}else{
-		$q = mysqli_query($db,'SELECT * FROM news where id_pseudo="'.$a.'" and id_category not in (select id from categories where id = "11" or id = "15") order by id desc');
-	}
-    
-		while ($d = mysqli_fetch_array($q)) 
-		{
+	$id = []; $user = []; $category = []; $titre = []; $photo = [];
+	if($db instanceof PDO){
+		if($a =='1'){
+			$q = $db->query('SELECT * FROM news WHERE id_category NOT IN (11,15) ORDER BY id DESC');
+		}else{
+			$stmt = $db->prepare('SELECT * FROM news WHERE id_pseudo = :id_pseudo AND id_category NOT IN (11,15) ORDER BY id DESC');
+			$stmt->execute([':id_pseudo' => (int)$a]);
+			$q = $stmt;
+		}
+		while ($d = $q->fetch()) {
 			$id[] = $d['id'];
 			$user[] = $d['id_pseudo'];
 			$category[] = $d['id_category'];
 			$titre[] = $d['titre'];
-			$photo[] = $d['photo'];
+			$photo[] = news_image_name($d['photo'], 1200);
 		}
+	}else{
+		if($a =='1'){
+			$q = mysqli_query($db,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") order by id desc');
+		}else{
+			$q = mysqli_query($db,'SELECT * FROM news where id_pseudo="'.$a.'" and id_category not in (select id from categories where id = "11" or id = "15") order by id desc');
+		}
+		while ($d = mysqli_fetch_array($q)) {
+			$id[] = $d['id'];
+			$user[] = $d['id_pseudo'];
+			$category[] = $d['id_category'];
+			$titre[] = $d['titre'];
+			$photo[] = news_image_name($d['photo'], 1200);
+		}
+	}
 	return array($id,$user,$category,$titre,$photo);	
 }
 
@@ -568,7 +703,7 @@ function GetAdminVideo($db,$a)
 			$user[] = $d['id_pseudo'];
 			$category[] = $d['id_category'];
 			$titre[] = $d['titre'];
-			$photo[] = $d['photo'];
+			$photo[] = news_image_name($d['photo'], 1200);
 		}
 	return array($id,$user,$category,$titre,$photo);	
 }
@@ -599,14 +734,21 @@ function CountVideos($db)
 
 function GetAdminMenuNews($db)
 {
-    $q = mysqli_query($db,'SELECT * FROM categories where id not in (select id from categories where id = "11" or id = "15") ');
-		while ($d = mysqli_fetch_array($q)) 
-		{
+    $id = []; $name = [];
+    if($db instanceof PDO){
+		$q = $db->query('SELECT * FROM categories WHERE id NOT IN (11,15)');
+		while ($d = $q->fetch()) {
 			$id[] = $d['id'];
 			$name[] = $d['name'];
 		}
-		
-		return array($id,$name);	
+		}else{
+		$q = mysqli_query($db,'SELECT * FROM categories where id not in (select id from categories where id = "11" or id = "15") ');
+		while ($d = mysqli_fetch_array($q)) {
+			$id[] = $d['id'];
+			$name[] = $d['name'];
+		}
+	}
+	return array($id,$name);	
 }
 
 function GetAdminVedions($db)
@@ -619,4 +761,261 @@ function GetAdminVedions($db)
 		}
 		
 		return array($id,$name);	
+}
+
+/* FUNCTION <JDAD> */
+
+function safeInt($value): int {
+    return filter_var($value, FILTER_VALIDATE_INT) !== false ? (int)$value : 0;
+}
+
+function redirectHomeAndExit(): void {
+    header('Location: ./', true, 302);
+    exit;
+}
+
+function allowedTable(string $table): bool {
+    return in_array($table, ['news', 'categories', 'sous_categories', 'caricature', 'opinion'], true);
+}
+
+function allowedColumn(string $col): bool {
+    return in_array($col, [
+        'id','titre','photo','auteur','description','description2','description3','description4','description5',
+        'date','id_category','name','urlVideo','nVues','photos','id_writer'
+    ], true);
+}
+
+function existsById(PDO $pdo, string $table, int $id): bool {
+    if (!allowedTable($table)) return false;
+    $sql = "SELECT 1 FROM `$table` WHERE id = :id LIMIT 1";
+    $st = $pdo->prepare($sql);
+    $st->execute([':id' => $id]);
+    return (bool)$st->fetchColumn();
+}
+
+function getById(PDO $pdo, string $table, string $column, int $id) {
+    if (!allowedTable($table) || !allowedColumn($column)) return null;
+    $sql = "SELECT `$column` FROM `$table` WHERE id = :id LIMIT 1";
+    $st = $pdo->prepare($sql);
+    $st->execute([':id' => $id]);
+    return $st->fetchColumn();
+}
+
+function incrementViews(PDO $pdo, int $id): void {
+    $sql = "UPDATE `news` SET `nVues` = COALESCE(`nVues`,0) + 1 WHERE `id` = :id";
+    $st = $pdo->prepare($sql);
+    $st->execute([':id' => $id]);
+}
+
+function migrate_news_images_to_webp_sizes($db, $limit = 0)
+{
+    $newsDir = __DIR__ . '/../../assets/img/news/';
+    if (!is_dir($newsDir)) {
+        return ['updated' => 0, 'skipped' => 0, 'errors' => ['news_dir_missing']];
+    }
+
+    $updated = 0;
+    $skipped = 0;
+    $errors = [];
+    $sizes = [300, 600, 1200];
+
+    if (!($db instanceof PDO)) {
+        return ['updated' => 0, 'skipped' => 0, 'errors' => ['pdo_required']];
+    }
+
+    $sql = 'SELECT id, titre, photo FROM news WHERE photo IS NOT NULL AND photo <> "" ORDER BY id ASC';
+    if ((int)$limit > 0) {
+        $sql .= ' LIMIT ' . (int)$limit;
+    }
+    $rows = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+
+    $updateStmt = $db->prepare('UPDATE news SET photo = :photo WHERE id = :id');
+
+    foreach ($rows as $row) {
+        $id = (int)($row['id'] ?? 0);
+        $photo = trim((string)($row['photo'] ?? ''));
+        $title = trim((string)($row['titre'] ?? ''));
+        if ($id <= 0 || $photo === '') {
+            $skipped++;
+            continue;
+        }
+
+        $sourceName = news_image_name($photo, 1200);
+        $sourcePath = $newsDir . $sourceName;
+        if (!is_file($sourcePath)) {
+            $fallbackPath = $newsDir . $photo;
+            if (is_file($fallbackPath)) {
+                $sourcePath = $fallbackPath;
+            } else {
+                $errors[] = 'missing_source:' . $id;
+                $skipped++;
+                continue;
+            }
+        }
+
+        $imageInfo = @getimagesize($sourcePath);
+        if (!$imageInfo || !isset($imageInfo[2])) {
+            $errors[] = 'invalid_image:' . $id;
+            $skipped++;
+            continue;
+        }
+
+        switch ($imageInfo[2]) {
+            case IMAGETYPE_JPEG:
+                $srcImage = @imagecreatefromjpeg($sourcePath);
+                break;
+            case IMAGETYPE_PNG:
+                $srcImage = @imagecreatefrompng($sourcePath);
+                break;
+            case IMAGETYPE_GIF:
+                $srcImage = @imagecreatefromgif($sourcePath);
+                break;
+            case IMAGETYPE_WEBP:
+                $srcImage = function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($sourcePath) : false;
+                break;
+            default:
+                $srcImage = false;
+        }
+
+        if (!$srcImage) {
+            $errors[] = 'gd_open_failed:' . $id;
+            $skipped++;
+            continue;
+        }
+
+        $slug = preg_replace('/[^\p{L}\p{N}]+/u', '-', mb_strtolower($title, 'UTF-8'));
+        $slug = trim((string)$slug, '-');
+        if ($slug === '') {
+            $slug = 'news-' . $id;
+        }
+        $baseName = $slug . '-' . time();
+        $srcW = imagesx($srcImage);
+        $srcH = imagesy($srcImage);
+        $ratio = $srcW / max($srcH, 1);
+        $okAll = true;
+
+        foreach ($sizes as $size) {
+            $targetW = (int)$size;
+            $targetH = (int)max(1, round($targetW / max($ratio, 0.00001)));
+            $canvas = imagecreatetruecolor($targetW, $targetH);
+            if (!$canvas) {
+                $okAll = false;
+                break;
+            }
+            imagecopyresampled($canvas, $srcImage, 0, 0, 0, 0, $targetW, $targetH, $srcW, $srcH);
+
+            $jpgPath = $newsDir . $baseName . '-' . $size . '.jpg';
+            $webpPath = $newsDir . $baseName . '-' . $size . '.webp';
+            if (!imagejpeg($canvas, $jpgPath, 82)) {
+                $okAll = false;
+                imagedestroy($canvas);
+                break;
+            }
+            if (function_exists('imagewebp')) {
+                @imagewebp($canvas, $webpPath, 82);
+            }
+            imagedestroy($canvas);
+        }
+
+        imagedestroy($srcImage);
+
+        if (!$okAll) {
+            $errors[] = 'generate_failed:' . $id;
+            $skipped++;
+            continue;
+        }
+
+        $newPhoto = $baseName . '-1200.jpg';
+        $updateStmt->execute([
+            ':photo' => $newPhoto,
+            ':id' => $id,
+        ]);
+        $updated++;
+    }
+
+    return ['updated' => $updated, 'skipped' => $skipped, 'errors' => $errors];
+}
+
+function count_missing_news_images($db)
+{
+    if (!($db instanceof PDO)) {
+        return 0;
+    }
+
+    $newsDir = __DIR__ . '/../../assets/img/news/';
+    if (!is_dir($newsDir)) {
+        return 0;
+    }
+
+    $rows = $db->query('SELECT photo FROM news WHERE photo IS NOT NULL AND photo <> ""')->fetchAll(PDO::FETCH_ASSOC);
+    $missing = 0;
+
+    foreach ($rows as $row) {
+        $photo = trim((string)($row['photo'] ?? ''));
+        if ($photo === '') {
+            continue;
+        }
+
+        $resolved = news_image_name($photo, 1200);
+        $primaryPath = $newsDir . $resolved;
+        $legacyPath = $newsDir . $photo;
+
+        if (!is_file($primaryPath) && !is_file($legacyPath)) {
+            $missing++;
+        }
+    }
+
+    return $missing;
+}
+
+function update_news_photo_db_type_to_webp($db, $limit = 0)
+{
+    if (!($db instanceof PDO)) {
+        return ['updated' => 0, 'skipped' => 0, 'errors' => ['pdo_required']];
+    }
+
+    $newsDir = __DIR__ . '/../../assets/img/news/';
+    if (!is_dir($newsDir)) {
+        return ['updated' => 0, 'skipped' => 0, 'errors' => ['news_dir_missing']];
+    }
+
+    $sql = 'SELECT id, photo FROM news WHERE photo IS NOT NULL AND photo <> "" AND (LOWER(photo) LIKE "%.jpg" OR LOWER(photo) LIKE "%.jpeg") ORDER BY id ASC';
+    if ((int)$limit > 0) {
+        $sql .= ' LIMIT ' . (int)$limit;
+    }
+
+    $rows = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    $updateStmt = $db->prepare('UPDATE news SET photo = :photo WHERE id = :id');
+    $updated = 0;
+    $skipped = 0;
+    $errors = [];
+
+    foreach ($rows as $row) {
+        $id = (int)($row['id'] ?? 0);
+        $photo = trim((string)($row['photo'] ?? ''));
+        if ($id <= 0 || $photo === '') {
+            $skipped++;
+            continue;
+        }
+
+        $webpPhoto = preg_replace('/\.(jpe?g)$/i', '.webp', $photo);
+        if ($webpPhoto === null || $webpPhoto === $photo) {
+            $skipped++;
+            continue;
+        }
+
+        if (!is_file($newsDir . $webpPhoto)) {
+            $errors[] = 'missing_webp:' . $id;
+            $skipped++;
+            continue;
+        }
+
+        $updateStmt->execute([
+            ':photo' => $webpPhoto,
+            ':id' => $id,
+        ]);
+        $updated++;
+    }
+
+    return ['updated' => $updated, 'skipped' => $skipped, 'errors' => $errors];
 }

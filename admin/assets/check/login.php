@@ -1,7 +1,7 @@
 <?php
   session_start();
   require_once('../func.php');
-  $db = connect();
+  $db = connect_pdo();
 
 if($_POST['act']=='ConnexionM'){
     if((trim($_POST['email'])=='')||(!email_V($_POST['email']))||(trim($_POST['psw'])==''))
@@ -9,8 +9,13 @@ if($_POST['act']=='ConnexionM'){
         if(trim($_POST['email'])==''){ echo " em "; }elseif(!email_V($_POST['email'])){ echo " ve "; }
         if(trim($_POST['psw'])==''){ echo " ps "; }
     }else{
-        $d = mysqli_fetch_array(mysqli_query($db,'SELECT id FROM  admin  WHERE email = "'.$_POST['email'].'" AND password = "'.md5($_POST['psw']).'"'));
-        if($d['id']>0){echo ' p1 '; $_SESSION['login_admin'] = md5($d['id']); }else{ echo ' p2 '; }
+        $admin = get_admin_by_email($db, trim($_POST['email']));
+        if($admin && verify_admin_password($db, $admin, $_POST['psw'])){
+            session_regenerate_id(true);
+            $_SESSION['admin_id'] = (int)$admin['id'];
+            unset($_SESSION['login_admin']);
+            echo ' p1 ';
+        }else{ echo ' p2 '; }
     }
 
 }elseif($_POST['act']=='addUser'){
@@ -20,7 +25,8 @@ if($_POST['act']=='ConnexionM'){
         if(trim($_POST['mail'])==''){ echo " em "; }elseif(!email_V($_POST['mail'])){ echo " ve "; }
         if(trim($_POST['psw'])==''){ echo " ps "; }
     }else{
-        mysqli_query($db, 'INSERT INTO `admin`(`id`,`name`,`email`,`password`,`active`) VALUES (Null,"'.$_POST['nom'].'","'.$_POST['mail'].'","'.md5($_POST['psw']).'","0")');
+        $hash = password_hash($_POST['psw'], PASSWORD_DEFAULT);
+        create_admin_user($db, $_POST['nom'], $_POST['mail'], $hash);
         echo " addUser ";
     }
 }

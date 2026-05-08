@@ -26,7 +26,7 @@
                   <img src="assets/images/portrait/small/avatar-s-19.png" alt="avatar"><i></i></span>
               </a>
               <div class="dropdown-menu dropdown-menu-right">
-              <?php if(loggedAdmin($db)){ ?>
+              <?php if(loggedAdmin($pdo)){ ?>
                 <a class="dropdown-item" href="addUser.php"><i class="ft-user"></i> إضافة حساب جديد</a>
                 <div class="dropdown-divider"></div>
               <?php } ?>

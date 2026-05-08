@@ -25,7 +25,7 @@
 						$c = ' id_category ="'.$cat.'"';
 						if($nomsouscat != ''){ if($souscat == ''){ $s = ''; }else{ $s = ' and id_sousCategory ="'.$souscat.'"';} }else{ $s = ''; }
 						$sql = "select * from news where ".$c." ".$s." order by id desc limit ".$limit."";
-						$query = mysqli_query($db,$sql);
+						$query = mysqli_query($pdo,$sql);
 
 						if(mysqli_num_rows($query) > 0){ 
 							while($row = mysqli_fetch_assoc($query)){

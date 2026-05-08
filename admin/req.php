@@ -1,24 +1,22 @@
 <?php
   session_start();
   require_once('assets/func.php');
-  $db = connect();
+  $db = connect_pdo();
 
 if(Get_current_page() != 'login.php'){
-    if(!isset($_SESSION['login_admin']))
+    if(!isset($_SESSION['admin_id']))
     {
         die('<meta http-equiv="refresh" content="0; url=login.php">');
     }
 }else{
-    if(isset($_SESSION['login_admin']))
+    if(isset($_SESSION['admin_id']))
     {
        die('<meta http-equiv="refresh" content="0; url=./">');
     }
 }
 
-if(isset($_SESSION['login_admin'])){
-  $req1='SELECT * FROM admin WHERE MD5(id)="'.$_SESSION['login_admin'].'"';
-  $q1 = mysqli_query($db,$req1);
-  $d1 = mysqli_fetch_array($q1);
+if(isset($_SESSION['admin_id'])){
+  $d1 = get_admin_by_id($db, (int)$_SESSION['admin_id']);
 } 
 
 if(curPageName()=='modCat.php'){

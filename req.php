@@ -1,139 +1,161 @@
 <?php
-
 require_once('admin/assets/func.php');
 
-$db = connect();
+$pdo = connect_pdo();
 
+/* ========= Defaults ========= */
+$titre = $photo = $auteur = $des1 = $des2 = $des3 = $des4 = $des5 = '';
+$date = $nomcat = $nomsouscat = $souscat = $url = $photos = $des = '';
+$cat = $writer = 0;
 
+/* ========= n ========= */
+if (isset($_GET['n'])) {
+    $n = safeInt(decripter($_GET['n'], 264));
 
-if(isset($_GET['n'])){
+    if (!existsById($pdo, 'news', $n)) {
+        redirectHomeAndExit();
+    }
 
-  $n = decripter($_GET['n'],264);
+    $titre  = (string)getById($pdo, 'news', 'titre', $n);
+    $photo  = (string)getById($pdo, 'news', 'photo', $n);
+    $auteur = (string)getById($pdo, 'news', 'auteur', $n);
+    $des1   = (string)getById($pdo, 'news', 'description', $n);
+    $des2   = (string)getById($pdo, 'news', 'description2', $n);
+    $des3   = (string)getById($pdo, 'news', 'description3', $n);
+    $des4   = (string)getById($pdo, 'news', 'description4', $n);
+    $des5   = (string)getById($pdo, 'news', 'description5', $n);
+    $date   = (string)getById($pdo, 'news', 'date', $n);
+    $cat    = safeInt(getById($pdo, 'news', 'id_category', $n));
+    $nomcat = (string)getById($pdo, 'categories', 'name', $cat);
 
-  if(exist($db,'id',$n,'news')){
-
-    $titre = GetTableByID($db,'news','titre',$n);
-
-    $photo = GetTableByID($db,'news','photo',$n);
-
-    $auteur = GetTableByID($db,'news','auteur',$n);
-
-    $des1 = GetTableByID($db,'news','description',$n);
-
-    $des2 = GetTableByID($db,'news','description2',$n);
-
-    $des3 = GetTableByID($db,'news','description3',$n);
-
-    $des4 = GetTableByID($db,'news','description4',$n);
-
-    $des5 = GetTableByID($db,'news','description5',$n);
-
-    $date = GetTableByID($db,'news','date',$n);
-
-    $cat = GetTableByID($db,'news','id_category',$n);
-
-    $nomcat = GetTableByID($db,'categories','name',$cat);
-
-  
-
-    $nVues = GetTableByID($db,'news','nVues',$n);
-
-    $vue = $nVues+1;
-
-    mysqli_query($db,'UPDATE  news set `nVues` = "'.$vue.'" WHERE id = "'.$n.'"');
-
-  }else{
-
-    die('<meta http-equiv="refresh" content="0; url=./">');
-
-  }  
-
+    incrementViews($pdo, $n);
 }
 
+/* ========= v ========= */
+if (isset($_GET['v'])) {
+    $v = safeInt(decripter($_GET['v'], 264));
 
+    if (!existsById($pdo, 'news', $v)) {
+        redirectHomeAndExit();
+    }
+
+    $titre  = (string)getById($pdo, 'news', 'titre', $v);
+    $url    = (string)getById($pdo, 'news', 'urlVideo', $v);
+    $auteur = (string)getById($pdo, 'news', 'auteur', $v);
+    $des1   = (string)getById($pdo, 'news', 'description', $v);
+    $date   = (string)getById($pdo, 'news', 'date', $v);
+    $cat    = safeInt(getById($pdo, 'news', 'id_category', $v));
+    $nomcat = (string)getById($pdo, 'categories', 'name', $cat);
+
+    incrementViews($pdo, $v);
+}
+
+/* ========= c ========= */
+if (isset($_GET['c'])) {
+    $cat = safeInt($_GET['c']);
+    $nomcat = (string)getById($pdo, 'categories', 'name', $cat);
+    $nomsouscat = '';
+    $souscat = '';
+}
+
+/* ========= cat ========= */
+if (isset($_GET['cat'])) {
+    $cat = safeInt($_GET['cat']);
+    $nomcat = (string)getById($pdo, 'categories', 'name', $cat);
+}
+
+/* ========= s ========= */
+if (isset($_GET['s'])) {
+    $souscat = safeInt($_GET['s']);
+    $nomsouscat = (string)getById($pdo, 'sous_categories', 'name', $souscat);
+}
+
+/* ========= i ========= */
+if (isset($_GET['i'])) {
+    $i = safeInt($_GET['i']);
+    $titre  = (string)getById($pdo, 'caricature', 'titre', $i);
+    $date   = (string)getById($pdo, 'caricature', 'date', $i);
+    $photos = (string)getById($pdo, 'caricature', 'photos', $i);
+}
+
+/* ========= o ========= */
+if (isset($_GET['o'])) {
+    $o = safeInt(decripter($_GET['o'], 264));
+
+    if (!existsById($pdo, 'opinion', $o)) {
+        redirectHomeAndExit();
+    }
+
+    $titre  = (string)getById($pdo, 'opinion', 'titre', $o);
+    $des    = (string)getById($pdo, 'opinion', 'description', $o);
+    $date   = (string)getById($pdo, 'opinion', 'date', $o);
+    $writer = safeInt(getById($pdo, 'opinion', 'id_writer', $o));
+}
+
+/*
+$db = connect();
+if(isset($_GET['n'])){
+  $n = decripter($_GET['n'],264);
+  if(exist($db,'id',$n,'news')){
+    $titre = GetTableByID($db,'news','titre',$n);
+    $photo = GetTableByID($db,'news','photo',$n);
+    $auteur = GetTableByID($db,'news','auteur',$n);
+    $des1 = GetTableByID($db,'news','description',$n);
+    $des2 = GetTableByID($db,'news','description2',$n);
+    $des3 = GetTableByID($db,'news','description3',$n);
+    $des4 = GetTableByID($db,'news','description4',$n);
+    $des5 = GetTableByID($db,'news','description5',$n);
+    $date = GetTableByID($db,'news','date',$n);
+    $cat = GetTableByID($db,'news','id_category',$n);
+    $nomcat = GetTableByID($db,'categories','name',$cat);
+    $nVues = GetTableByID($db,'news','nVues',$n);
+    $vue = $nVues+1;
+    mysqli_query($db,'UPDATE  news set `nVues` = "'.$vue.'" WHERE id = "'.$n.'"');
+  }else{
+    die('<meta http-equiv="refresh" content="0; url=./">');
+  }  
+}
 
 if(isset($_GET['v'])){
-
   $v = decripter($_GET['v'],264);
-
   if(exist($db,'id',$v,'news')){
-
     $titre = GetTableByID($db,'news','titre',$v);
-
     $url = GetTableByID($db,'news','urlVideo',$v);
-
     $auteur = GetTableByID($db,'news','auteur',$v);
-
     $des1 = GetTableByID($db,'news','description',$v);
-
     $date = GetTableByID($db,'news','date',$v);
-
     $cat = GetTableByID($db,'news','id_category',$v);
-
     $nomcat = GetTableByID($db,'categories','name',$cat);
-
-  
-
     $nVues = GetTableByID($db,'news','nVues',$v);
-
     $vue = $nVues+1;
-
     mysqli_query($db,'UPDATE  news set `nVues` = "'.$vue.'" WHERE id = "'.$v.'"');
-
   }else{
-
     die('<meta http-equiv="refresh" content="0; url=./">');
-
   }  
-
 }
-
-
 
 if(isset($_GET['c'])){
-
   $nomcat =  GetTableByID($db,'categories','name',$_GET['c']);
-
   $cat =  $_GET['c'] ;
-
   $nomsouscat ='';
-
   $souscat ='';
-
 }
-
-
 
 if(isset($_GET['cat'])){
-
   $nomcat =  GetTableByID($db,'categories','name',$_GET['cat']);
-
   $cat =  $_GET['cat'] ;
-
 }
-
-
 
 if(isset($_GET['s'])){
-
   $nomsouscat =  GetTableByID($db,'sous_categories','name',$_GET['s']);
-
   $souscat =  $_GET['s'] ;
-
 }
-
-
 
 if(isset($_GET['i'])){
-
   $titre = GetTableByID($db,'caricature','titre',$_GET['i']);
-
   $date = GetTableByID($db,'caricature','date',$_GET['i']);
-
   $photos = GetTableByID($db,'caricature','photos',$_GET['i']);
-
 }
-
 
 if(isset($_GET['o'])){
   $o = decripter($_GET['o'],264);
@@ -146,140 +168,126 @@ if(isset($_GET['o'])){
     die('<meta http-equiv="refresh" content="0; url=./">');
   } 
 }
+**/
 
-
+  $host = $_SERVER['HTTP_HOST'] ?? '';
+  $isLocal =
+    in_array($host, ['localhost', '127.0.0.1'], true) ||
+    str_ends_with($host, '.test') ||
+    str_ends_with($host, '.local');
+  $baseHref = $isLocal
+    ? ('http://' . $host . '/alnoortv/')
+    : 'https://www.alnoortv.ma/';
 
 ?>
 
-
-
 <!DOCTYPE html>
-
 <html dir="rtl" lang="ar">
-
   <head>
-
   <meta charset="utf-8" />
-
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-
     <meta http-equiv="Content-Type" content="text/html" charset="utf-8"> 
-
     <?php include_once('include/metas.php'); ?>
-
     <title><?php echo $title_doc ?></title>
-
     <meta name="description" content="<?php echo $desc_doc ?>">
-
     <meta name="keywords" content="<?php echo $keys_doc ?>">
-
-    <base href="https://www.alnoortv.ma/" />
-
+    <base href="<?php echo $baseHref; ?>" />
     <link rel="apple-touch-icon" sizes="57x57" href="assets/img/favicon/apple-icon-57x57.png">
-
     <link rel="apple-touch-icon" sizes="60x60" href="assets/img/favicon/apple-icon-60x60.png">
-
     <link rel="apple-touch-icon" sizes="72x72" href="assets/img/favicon/apple-icon-72x72.png">
-
     <link rel="apple-touch-icon" sizes="76x76" href="assets/img/favicon/apple-icon-76x76.png">
-
     <link rel="apple-touch-icon" sizes="114x114" href="assets/img/favicon/apple-icon-114x114.png">
-
     <link rel="apple-touch-icon" sizes="120x120" href="assets/img/favicon/apple-icon-120x120.png">
-
     <link rel="apple-touch-icon" sizes="144x144" href="assets/img/favicon/apple-icon-144x144.png">
-
     <link rel="apple-touch-icon" sizes="152x152" href="assets/img/favicon/apple-icon-152x152.png">
-
     <link rel="apple-touch-icon" sizes="180x180" href="assets/img/favicon/apple-icon-180x180.png">
-
     <link rel="icon" type="image/png" sizes="192x192"  href="assets/img/favicon/android-icon-192x192.png">
-
     <link rel="icon" type="image/png" sizes="32x32" href="assets/img/favicon/favicon-32x32.png">
-
     <link rel="icon" type="image/png" sizes="96x96" href="assets/img/favicon/favicon-96x96.png">
-
     <link rel="icon" type="image/png" sizes="16x16" href="assets/img/favicon/favicon-16x16.png">
-
-
-
     <meta name="msapplication-TileColor" content="#ffffff">
-
     <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
-
     <meta name="theme-color" content="#ffffff">
+    <!-- Fonts -->
+  <style>
+    @font-face{
+      font-family:'iconFont';
+      src:url("assets/css/fonts/iconfont.woff") format("woff");
+      font-weight:normal;
+      font-style:normal;
+      font-display:swap
+    }
+    @font-face{
+      font-family:"Kalligraaf Arabic Light";
+      font-weight:300;
+      font-style:normal;
+      font-stretch:normal;
+      font-display:swap;
+      src:url("assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Light.ttf") format("truetype")
+    }
+    @font-face{
+      font-family:"Kalligraaf Arabic Medium";
+      font-weight:500;
+      font-style:normal;
+      font-stretch:normal;
+      font-display:swap;
+      src:url("assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Medium.ttf") format("truetype")
+    }
+    @font-face{
+      font-family:"Kalligraaf Arabic Semi Bold";
+      font-weight:700;
+      font-style:normal;
+      font-stretch:normal;
+      font-display:swap;
+      src:url("assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Bold.ttf") format("truetype")
+    }
+  </style>
 
-    <style>@font-face{font-family:'iconFont';src:url("assets/css/fonts/iconfont.woff") format("woff");font-weight:normal;font-style:normal;font-display:swap}</style>
+  <link rel="preload" href="assets/css/fonts/iconfont.woff" as="font" type="font/woff" crossorigin>
+  <link rel="preload" href="assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Light.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Medium.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="preload" href="assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Bold.ttf" as="font" type="font/ttf" crossorigin>
 
-    <link rel=preload href=assets/css/fonts/iconfont.woff as=font type=font/woff crossorigin=anonymous>
+  <!-- Page CSS -->
+  <?php if ((curPageName()=='index.php') || (curPageName()=='./')) { ?>
+    <link rel="stylesheet" type="text/css" media="screen" href="assets/index.css"/>
+    <link rel="stylesheet" type="text/css" media="screen" href="assets/lazyImages/fancyLazyImages.css"/>
+  <?php } elseif (
+      (curPageName()=='news.php') ||
+      (curPageName()=='conditions.php') ||
+      (curPageName()=='chaine.php') ||
+      (curPageName()=='contact.php') ||
+      (curPageName()=='author.php') ||
+      (curPageName()=='opinion.php') ||
+      (curPageName()=='opinions.php') ||
+      (curPageName()=='cat.php') ||
+      (curPageName()=='videos.php') ||
+      (curPageName()=='video.php') ||
+      (curPageName()=='infographics.php') ||
+      (curPageName()=='regie.php') ||
+      (curPageName()=='persons.php')
+  ) { ?>
+    <link rel="stylesheet" type="text/css" media="screen" href="assets/cat.css"/>
+  <?php } elseif (curPageName()=='infographic.php') { ?>
+    <link rel="stylesheet" type="text/css" media="screen" href="assets/info.css"/>
+  <?php } ?>
 
-    <style>@font-face{font-family:"Kalligraaf Arabic Light";font-weight:300;font-style:normal;font-stretch:normal;font-display:swap;src:url("assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Light.ttf") format("truetype")}</style>
+  <meta name="google-site-verification" content="1ywWVdkOYCWPWm5cy6zHNgVre1IJraCiku6K2029HUU" />
 
-    <link rel="preload" href="assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Light.ttf" as="font" type="font/ttf" crossorigin="anonymous">
-
-    <style>@font-face{font-family:"Kalligraaf Arabic Medium";font-weight:500;font-style:normal;font-stretch:normal;font-display:swap;src:url("assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Medium.ttf") format("truetype")}}</style>
-
-    <link rel="preload" href="assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Medium.ttf" as="font" type="font/ttf" crossorigin="anonymous">
-
-    <style>@font-face{font-family:"Kalligraaf Arabic Semi Bold";font-weight:500;font-style:normal;font-stretch:normal;font-display:swap;src:url("assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Bold.ttf") format("truetype")}}</style>
-
-    <link rel="preload" href="assets/css/fonts/Kalligraaf/Kalligraaf_Arabic_Bold.ttf" as="font" type="font/ttf" crossorigin="anonymous">
-
-    
-
-    <?php  if((curPageName()=='index.php')||(curPageName()=='./')) { ?>
-
-      <link rel="stylesheet" rel='preload' type="text/css" media="screen" href="assets/index.css"/>
-
-      <link rel="stylesheet" rel='preload' type="text/css" media="screen" href="assets/lazyImages/fancyLazyImages.css" />
-
-    <?php  } elseif((curPageName()=='news.php')||(curPageName()=='conditions.php')||(curPageName()=='chaine.php')||(curPageName()=='contact.php')||(curPageName()=='author.php')||(curPageName()=='opinion.php')||(curPageName()=='opinions.php')||(curPageName()=='cat.php')||(curPageName()=='videos.php')||(curPageName()=='video.php')||(curPageName()=='infographics.php')||(curPageName()=='regie.php')||(curPageName()=='persons.php')) { ?>
-
-      <link rel=stylesheet type=text/css media=screen href='assets/cat.css'/>
-
-    <?php  }elseif(curPageName()=='infographic.php'){ ?>
-
-      <link rel=stylesheet type=text/css media=screen href='assets/info.css'/>
-
-    <?php  } ?>
-
-
-
-    <meta name="google-site-verification" content="1ywWVdkOYCWPWm5cy6zHNgVre1IJraCiku6K2029HUU" />
-
-
-
-    <?php  if((curPageName()=='opinion.php')||(curPageName()=='video.php')||(curPageName()=='news.php')||(curPageName()=='article.php')) { ?>
-
-        <script type='text/javascript' src='https://platform-api.sharethis.com/js/sharethis.js#property=6028d5a5f8ce400012e81629&product=inline-share-buttons' async='async'></script>
-
-        
-
-        <meta property="og:title" content="<?php echo $title_doc ?>" />
-
-        <meta property="og:url" content="<?php echo $url ?>" />
-
-        <meta property="og:image" content="<?php echo $img_doc ?>" />
-
-        <meta property="og:description" content="" />
-
-        <meta property="og:site_name" content="alnoortv.ma" />
-
-    <?php  } ?>
-
-
-
-
-
-
-
-
-
-
-
-
+  <?php if (
+      (curPageName()=='opinion.php') ||
+      (curPageName()=='video.php') ||
+      (curPageName()=='news.php') ||
+      (curPageName()=='article.php')
+  ) { ?>
+    <script src="https://platform-api.sharethis.com/js/sharethis.js#property=6028d5a5f8ce400012e81629&product=inline-share-buttons" async></script>
+    <meta property="og:title" content="<?php echo $title_doc ?? ''; ?>" />
+    <meta property="og:url" content="<?php echo $url ?? ''; ?>" />
+    <meta property="og:image" content="<?php echo $img_doc ?? ''; ?>" />
+    <meta property="og:description" content="" />
+    <meta property="og:site_name" content="alnoortv.ma" />
+  <?php } ?>
 
   <style>
 

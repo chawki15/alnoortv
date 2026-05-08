@@ -55,9 +55,11 @@
 <script src="assets/vendors/js/tables/datatable/datatables.min.js" type="text/javascript"></script>
 <script>
   $(document).ready(function () {
+    var isAfficherNews = "<?php echo curPageName(); ?>" === "afficherNews.php";
     $('#list').dataTable({
       "order": [],
-      "pageLength": 50
+      "pageLength": isAfficherNews ? 100 : 200,
+      "paging": !isAfficherNews
     });
   });
 </script>

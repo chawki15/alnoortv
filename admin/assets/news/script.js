@@ -536,137 +536,59 @@ $(".afficher .close").html(
   '<span><i class="fa fa-trash-o" aria-hidden="true"></i></span>'
 );
 
-CKEDITOR.replace("desc6", {
-  language: "ar",
-  toolbarGroups: [
-    { name: "document", groups: ["mode", "document", "doctools"] },
-    { name: "basicstyles", groups: ["basicstyles", "cleanup"] },
-    {
-      name: "paragraph",
-      groups: ["list", "indent", "blocks", "align", "bidi", "paragraph"],
-    },
-    { name: "clipboard", groups: ["clipboard", "undo"] },
-    {
-      name: "editing",
-      groups: ["find", "selection", "spellchecker", "editing"],
-    },
-    { name: "forms", groups: ["forms"] },
-    { name: "links", groups: ["links"] },
-    { name: "insert", groups: ["insert"] },
-    { name: "styles", groups: ["styles"] },
-    { name: "colors", groups: ["colors"] },
-    { name: "tools", groups: ["tools"] },
-    { name: "others", groups: ["others"] },
-    { name: "about", groups: ["about"] },
-  ],
-  removeButtons:
-    "About,Source,Print,Preview,ExportPdf,NewPage,Save,Templates,PasteText,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,Blockquote,CreateDiv,BidiLtr,BidiRtl,Anchor,Image,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Maximize,ShowBlocks",
-});
 
-CKEDITOR.replace("desc2", {
-  language: "ar",
-  toolbarGroups: [
-    { name: "document", groups: ["mode", "document", "doctools"] },
-    { name: "basicstyles", groups: ["basicstyles", "cleanup"] },
-    {
-      name: "paragraph",
-      groups: ["list", "indent", "blocks", "align", "bidi", "paragraph"],
-    },
-    { name: "clipboard", groups: ["clipboard", "undo"] },
-    {
-      name: "editing",
-      groups: ["find", "selection", "spellchecker", "editing"],
-    },
-    { name: "forms", groups: ["forms"] },
-    { name: "links", groups: ["links"] },
-    { name: "insert", groups: ["insert"] },
-    { name: "styles", groups: ["styles"] },
-    { name: "colors", groups: ["colors"] },
-    { name: "tools", groups: ["tools"] },
-    { name: "others", groups: ["others"] },
-    { name: "about", groups: ["about"] },
-  ],
-  removeButtons:
-    "About,Source,Print,Preview,ExportPdf,NewPage,Save,Templates,PasteText,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,Blockquote,CreateDiv,BidiLtr,BidiRtl,Anchor,Image,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Maximize,ShowBlocks",
-});
+var newsEditorIds = ["desc2", "desc3", "desc4", "desc5", "desc6"];
+function initNewsEditor(editorId) {
+  if (!window.CKEDITOR) return false;
+  var el = document.getElementById(editorId);
+  if (!el) return false;
+  if (CKEDITOR.instances && CKEDITOR.instances[editorId]) return true;
+  try {
+    CKEDITOR.replace(editorId, {
+      language: "ar",
+      contentsLangDirection: "rtl",
+      height: 220,
+      width: "100%",
+      toolbarGroups: [
+        { name: "document", groups: ["mode", "document", "doctools"] },
+        { name: "basicstyles", groups: ["basicstyles", "cleanup"] },
+        { name: "paragraph", groups: ["list", "indent", "blocks", "align", "bidi", "paragraph"] },
+        { name: "clipboard", groups: ["clipboard", "undo"] },
+        { name: "editing", groups: ["find", "selection", "spellchecker", "editing"] },
+        { name: "forms", groups: ["forms"] },
+        { name: "links", groups: ["links"] },
+        { name: "insert", groups: ["insert"] },
+        { name: "styles", groups: ["styles"] },
+        { name: "colors", groups: ["colors"] },
+        { name: "tools", groups: ["tools"] },
+        { name: "others", groups: ["others"] },
+        { name: "about", groups: ["about"] }
+      ],
+      removeButtons:
+        "About,Source,Print,Preview,ExportPdf,NewPage,Save,Templates,PasteText,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,Blockquote,CreateDiv,BidiLtr,BidiRtl,Anchor,Image,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Maximize,ShowBlocks"
+    });
+    return true;
+  } catch (err) {
+    if (window.console && console.error) {
+      console.error("CKEDITOR init error in " + editorId + ":", err);
+    }
+    return false;
+  }
+}
 
-CKEDITOR.replace("desc3", {
-  language: "ar",
-  toolbarGroups: [
-    { name: "document", groups: ["mode", "document", "doctools"] },
-    { name: "basicstyles", groups: ["basicstyles", "cleanup"] },
-    {
-      name: "paragraph",
-      groups: ["list", "indent", "blocks", "align", "bidi", "paragraph"],
-    },
-    { name: "clipboard", groups: ["clipboard", "undo"] },
-    {
-      name: "editing",
-      groups: ["find", "selection", "spellchecker", "editing"],
-    },
-    { name: "forms", groups: ["forms"] },
-    { name: "links", groups: ["links"] },
-    { name: "insert", groups: ["insert"] },
-    { name: "styles", groups: ["styles"] },
-    { name: "colors", groups: ["colors"] },
-    { name: "tools", groups: ["tools"] },
-    { name: "others", groups: ["others"] },
-    { name: "about", groups: ["about"] },
-  ],
-  removeButtons:
-    "About,Source,Print,Preview,ExportPdf,NewPage,Save,Templates,PasteText,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,Blockquote,CreateDiv,BidiLtr,BidiRtl,Anchor,Image,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Maximize,ShowBlocks",
-});
+function initAllNewsEditors() {
+  if (!window.CKEDITOR) return;
+  newsEditorIds.forEach(initNewsEditor);
+}
 
-CKEDITOR.replace("desc4", {
-  language: "ar",
-  toolbarGroups: [
-    { name: "document", groups: ["mode", "document", "doctools"] },
-    { name: "basicstyles", groups: ["basicstyles", "cleanup"] },
-    {
-      name: "paragraph",
-      groups: ["list", "indent", "blocks", "align", "bidi", "paragraph"],
-    },
-    { name: "clipboard", groups: ["clipboard", "undo"] },
-    {
-      name: "editing",
-      groups: ["find", "selection", "spellchecker", "editing"],
-    },
-    { name: "forms", groups: ["forms"] },
-    { name: "links", groups: ["links"] },
-    { name: "insert", groups: ["insert"] },
-    { name: "styles", groups: ["styles"] },
-    { name: "colors", groups: ["colors"] },
-    { name: "tools", groups: ["tools"] },
-    { name: "others", groups: ["others"] },
-    { name: "about", groups: ["about"] },
-  ],
-  removeButtons:
-    "About,Source,Print,Preview,ExportPdf,NewPage,Save,Templates,PasteText,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,Blockquote,CreateDiv,BidiLtr,BidiRtl,Anchor,Image,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Maximize,ShowBlocks",
-});
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initAllNewsEditors);
+} else {
+  initAllNewsEditors();
+}
 
-CKEDITOR.replace("desc5", {
-  language: "ar",
-  toolbarGroups: [
-    { name: "document", groups: ["mode", "document", "doctools"] },
-    { name: "basicstyles", groups: ["basicstyles", "cleanup"] },
-    {
-      name: "paragraph",
-      groups: ["list", "indent", "blocks", "align", "bidi", "paragraph"],
-    },
-    { name: "clipboard", groups: ["clipboard", "undo"] },
-    {
-      name: "editing",
-      groups: ["find", "selection", "spellchecker", "editing"],
-    },
-    { name: "forms", groups: ["forms"] },
-    { name: "links", groups: ["links"] },
-    { name: "insert", groups: ["insert"] },
-    { name: "styles", groups: ["styles"] },
-    { name: "colors", groups: ["colors"] },
-    { name: "tools", groups: ["tools"] },
-    { name: "others", groups: ["others"] },
-    { name: "about", groups: ["about"] },
-  ],
-  removeButtons:
-    "About,Source,Print,Preview,ExportPdf,NewPage,Save,Templates,PasteText,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,Blockquote,CreateDiv,BidiLtr,BidiRtl,Anchor,Image,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Maximize,ShowBlocks",
-});
+if (window.CKEDITOR && typeof CKEDITOR.on === "function") {
+  CKEDITOR.on("loaded", initAllNewsEditors);
+}
+window.initNewsEditor = initNewsEditor;
+window.initAllNewsEditors = initAllNewsEditors;

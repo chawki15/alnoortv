@@ -1,3 +1,40 @@
+function showSuccessMessage(title, onClose) {
+  if (window.Swal && typeof Swal.fire === 'function') {
+    Swal.fire({ icon: "success", title: title, showConfirmButton: false, timer: 2000 }).then(() => { if (onClose) onClose(); });
+  } else if (window.swal && typeof swal.fire === 'function') {
+    swal.fire({ icon: "success", title: title, showConfirmButton: false, timer: 2000 }).then(() => { if (onClose) onClose(); });
+  } else {
+    if (onClose) onClose();
+  }
+}
+
+function showResponseDebug(text, ok) {
+  var box = document.getElementById("newsServerResponse");
+  if (!box) {
+    box = document.createElement("div");
+    box.id = "newsServerResponse";
+    box.style.marginTop = "10px";
+    box.style.padding = "8px 12px";
+    box.style.borderRadius = "4px";
+    var form = document.getElementById("news");
+    if (form) form.prepend(box);
+  }
+  box.style.display = "block";
+  box.style.background = ok ? "#e8f7ec" : "#fdecec";
+  box.style.color = ok ? "#0f5132" : "#842029";
+  box.style.border = ok ? "1px solid #badbcc" : "1px solid #f5c2c7";
+  box.textContent = text;
+}
+
+function showErrorMessage(title, text) {
+  if (window.Swal && typeof Swal.fire === 'function') {
+    Swal.fire({ icon: "error", title: title, text: text });
+  } else if (window.swal && typeof swal.fire === 'function') {
+    swal.fire({ icon: "error", title: title, text: text });
+  } else {
+  }
+}
+
 $(document).ready(function () {
   $("body").on('submit', '#login', function(e){
     e.preventDefault();
@@ -327,11 +364,24 @@ $(document).ready(function () {
 
   $("body").on('submit', '#news', function(e){
     e.preventDefault();
+    if (window.CKEDITOR && CKEDITOR.instances) {
+      ["desc2", "desc3", "desc4", "desc5", "desc6"].forEach(function (id) {
+        if (CKEDITOR.instances[id] && typeof CKEDITOR.instances[id].updateElement === "function") {
+          try {
+            CKEDITOR.instances[id].updateElement();
+          } catch (err) {
+            showResponseDebug("CKEDITOR sync error in " + id + ": " + err.message, false);
+          }
+        }
+      });
+    }
     $.ajax({
       type: "POST",
       url: "assets/check/news.php",
       data: $(this).serialize(),
       success: function (data) {
+        var rawResponse = (data === undefined || data === null) ? "" : String(data);
+        showResponseDebug("RAW: " + rawResponse, true);
         $("#checkSelectCat").css({ display: "none" });
         $("#checkTitleNews").css({ display: "none" });
         $("#checkPhotoNews").css({ display: "none" });
@@ -344,10 +394,12 @@ $(document).ready(function () {
         }
         
         var regSeparator = new RegExp("[ ,;]+", "g");
-        var myString = data;
+        var myString = rawResponse.trim();
         var each = myString.split(regSeparator);
+        var hasKnownResponse = false;
         for (var e = 0; e < each.length; e++) {
           if (each[e] == "cl") {
+            hasKnownResponse = true;
             $("#selectCategory").css({ border: "2px solid #DA2128" });
             $("#checkSelectCat").html("من فضلك اختر اسم الفئة");
             $("#checkSelectCat").css({ color: "#FF4961" });
@@ -357,17 +409,20 @@ $(document).ready(function () {
           }
 
           if (each[e] == "enwph") {
+            hasKnownResponse = true;
             $("#checkPhotoNews").html("الرجاء تحميل الصور");
             $("#checkPhotoNews").css({ color: "#FF4961" });
             $("#checkPhotoNews").fadeIn("slow");
           }
 
           if (each[e] == "enw") {
+            hasKnownResponse = true;
             $("#titleNews").css({ border: "2px solid #DA2128" });
             $("#checkTitleNews").html("من فضلك ادخل عنوان الخبر");
             $("#checkTitleNews").css({ color: "#FF4961" });
             $("#checkTitleNews").fadeIn("slow");
           } else if (each[e] == "vnw") {
+            hasKnownResponse = true;
             $("#titleNews").css({ border: "2px solid #DA2128" });
             $("#checkTitleNews").html("الرجاء إدخال عنوان الخبر بالعربية");
             $("#checkTitleNews").css({ color: "#FF4961" });
@@ -380,11 +435,13 @@ $(document).ready(function () {
           }
 
           if (each[e] == "eAuteur") {
+            hasKnownResponse = true;
             $("#auteur").css({ border: "2px solid #DA2128" });
             $("#checkAuteur").html("من فضلك ادخل صاحب الخبر أو المصدر");
             $("#checkAuteur").css({ color: "#FF4961" });
             $("#checkAuteur").fadeIn("slow");
           } else if (each[e] == "vAuteur") {
+            hasKnownResponse = true;
             $("#auteur").css({ border: "2px solid #DA2128" });
             $("#checkAuteur").html("الرجاء إدخال صاحب الخبر أو المصدر بالعربية");
             $("#checkAuteur").css({ color: "#FF4961" });
@@ -393,23 +450,27 @@ $(document).ready(function () {
 
           for (let i = 2; i < 7; i++) {
             if (each[e] == "edes" + i) {
+              hasKnownResponse = true;
               $("#desc" + i).css({ border: "2px solid #DA2128" });
               $("#checkDescription" + i).html("من فضلك ادخل نص الخبر");
               $("#checkDescription" + i).css({ color: "#FF4961" });
               $("#checkDescription" + i).fadeIn("slow");
             } else if (each[e] == "vdes" + i) {
+              hasKnownResponse = true;
               $("#desc" + i).css({ border: "2px solid #DA2128" });
               $("#checkDescription" + i).html("الرجاء إدخال  نص الخبر بالعربية");
               $("#checkDescription" + i).css({ color: "#FF4961" });
               $("#checkDescription" + i).fadeIn("slow");
             }
             if (each[e] == "dscphoto" + i) {
+              hasKnownResponse = true;
               $("#descphoto" + i).css({ border: "2px solid #DA2128" });
               $("#checkDescphoto" + i).html("الرجاء إدخال وصف الصورة بالعربية");
               $("#checkDescphoto" + i).css({ color: "#FF4961" });
               $("#checkDescphoto" + i).fadeIn("slow");
             }
             if (each[e] == "photonw" + i) {
+              hasKnownResponse = true;
               $("#checkPhotoNews" + i).html("الرجاء تحميل الصور");
               $("#checkPhotoNews" + i).css({ color: "#FF4961" });
               $("#checkPhotoNews" + i).fadeIn("slow");
@@ -417,27 +478,31 @@ $(document).ready(function () {
           }
 
           if (each[e] == "addNews") {
-            Swal.fire({
-              icon: "success",
-              title: "تم حفض البيانات بنجاح",
-              showConfirmButton: false,
-              timer: 2000,
-            }).then((result) => {
-              window.location = "./afficherNews.php";
-            });
+             hasKnownResponse = true;
+showResponseDebug("تم حفظ الخبر بنجاح", true);
+showSuccessMessage("تم حفض البيانات بنجاح", function(){ window.location = "./afficherNews.php"; });
+          }
+
+          if (each[e] == "server_error") {
+            hasKnownResponse = true;
+            showErrorMessage("خطأ في الخادم", "تعذر حفظ الخبر. تحقق من سجل الأخطاء (error_log).");
           }
 
           if (each[e] == "modNews") {
-            Swal.fire({
-              icon: "success",
-              title: "تم تعديل البيانات بنجاح",
-              showConfirmButton: false,
-              timer: 2000,
-            }).then((result) => {
-              window.location = "./afficherNews.php";
-            });
+             hasKnownResponse = true;
+showResponseDebug("تم تعديل الخبر بنجاح", true);
+showSuccessMessage("تم تعديل البيانات بنجاح", function(){ window.location = "./afficherNews.php"; });
           }
         }
+
+        if (!hasKnownResponse) {
+          showResponseDebug(myString !== "" ? myString : "تعذر حفظ الخبر، تحقق من الحقول المطلوبة.", false);
+          showErrorMessage("حدث خطأ غير متوقع", myString !== "" ? myString : "تعذر حفظ الخبر، تحقق من الحقول المطلوبة.");
+        }
+      },
+      error: function (xhr) {
+        showResponseDebug(xhr && xhr.responseText ? xhr.responseText : "فشل إرسال الطلب إلى الخادم", false);
+        showErrorMessage("خطأ في الاتصال", xhr && xhr.responseText ? xhr.responseText : "فشل إرسال الطلب إلى الخادم");
       },
     });
     return false;

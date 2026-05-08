@@ -2,7 +2,7 @@
     <div class="main-menu-content">
       <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
         <li class=" nav-item"><a href="index.php"><i class="la la-home"></i><span class="menu-title">الرئيسية</span></a></li>
-        <?php if(loggedAdmin($db)){ ?>
+        <?php if(loggedAdmin($pdo)){ ?>
         <li class=" nav-item"><a href="#"><i class="la la-navicon"></i><span class="menu-title">الاقسام الرئيسية</span></a>
           <ul class="menu-content">
             <li><a class="menu-item" href="addCat.php">اضافة قسم جديد</a>

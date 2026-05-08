@@ -1,180 +1,144 @@
-Options None
-Options FollowSymLinks
-AddDefaultCharset UTF-8
-AddType 'text/html; charset=UTF-8' .html
-AddCharset UTF-8 .html
-
-
-RewriteEngine On
-
-
-RewriteCond %{HTTPS} off
-RewriteRule (.*) https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]	
-RewriteCond %{HTTP_HOST} !^www\. [NC]
-RewriteRule (.*) https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-
-RewriteCond %{REQUEST_FILENAME} !-fA
-RewriteCond %{REQUEST_FILENAME} !A-d
-
-
-
-RewriteRule ^قسم-الأخبار/?$ cat.php?c=1 [L,QSA]
-RewriteRule ^سياسة/?$ cat.php?c=2 [L,QSA]
-RewriteRule ^حوادث/?$ cat.php?c=3 [L,QSA]
-RewriteRule ^إقتصاد/?$ cat.php?c=4 [L,QSA]
-RewriteRule ^رياضة/?$ cat.php?c=5 [L,QSA]
-RewriteRule ^فن-وثقافة/?$ cat.php?c=6 [L,QSA]
-RewriteRule ^مجتمع/?$ cat.php?c=7 [L,QSA]
-RewriteRule ^المرأة/?$ cat.php?c=8 [L,QSA]
-RewriteRule ^صحة/?$ cat.php?c=9 [L,QSA]
-RewriteRule ^سياحة-وسفر/?$ cat.php?c=10 [L,QSA]
-RewriteRule ^فيديو/?$ videos.php?c=11 [L,QSA]
-RewriteRule ^أخبار-دولية/?$ cat.php?c=12 [L,QSA]
-RewriteRule ^سيارات/?$ cat.php?c=13 [L,QSA]
-RewriteRule ^مغاربة-العالم/?$ cat.php?c=14 [L,QSA]
-RewriteRule ^آراء-وتحليلات/?$ cat.php?c=15 [L,QSA]
-
-RewriteRule ^قسم-الأخبار-آخر-الأخبار/?$ cat.php?cat=1&s=15 [L,QSA]
-RewriteRule ^قسم-الأخبار-أخبار-عاجلة/?$ cat.php?cat=1&s=16 [L,QSA]
-
-RewriteRule ^سياسة-المغرب/?$ cat.php?cat=2&s=1 [L,QSA]
-RewriteRule ^سياسة-المغرب-العربي/?$ cat.php?cat=2&s=2 [L,QSA]
-RewriteRule ^سياسة-الشرق-الأوسط/?$ cat.php?cat=2&s=3 [L,QSA]
-RewriteRule ^سياسة-دولي/?$ cat.php?cat=2&s=4 [L,QSA]
-
-
-RewriteRule ^إقتصاد-المغرب/?$ cat.php?cat=4&s=5 [L,QSA]
-RewriteRule ^إقتصاد-المغرب-العربي/?$ cat.php?cat=4&s=6 [L,QSA]
-RewriteRule ^إقتصاد-الشرق-الأوسط/?$ cat.php?cat=4&s=7 [L,QSA]
-RewriteRule ^إقتصاد-دولي/?$ cat.php?cat=4&s=8 [L,QSA]
-
-RewriteRule ^رياضة-المغرب/?$ cat.php?cat=5&s=10 [L,QSA]
-RewriteRule ^رياضة-العرب/?$ cat.php?cat=5&s=13 [L,QSA]
-RewriteRule ^رياضة-العالم/?$ cat.php?cat=5&s=14 [L,QSA]
-
-RewriteRule ^فن-وثقافة-المغرب/?$ cat.php?cat=6&s=9 [L,QSA]
-RewriteRule ^فن-وثقافة-العرب/?$ cat.php?cat=6&s=11 [L,QSA]
-RewriteRule ^فن-وثقافة-العالم/?$ cat.php?cat=6&s=12 [L,QSA]
-
-RewriteRule ^فيديو-تقارير/?$ videos.php?cat=11&s=17 [L,QSA]
-RewriteRule ^فيديو-ربورطاجات/?$ videos.php?cat=11&s=18 [L,QSA]
-RewriteRule ^فيديو-حوارات/?$ videos.php?cat=11&s=19 [L,QSA]
-RewriteRule ^فيديو-برامج/?$ videos.php?cat=11&s=20 [L,QSA]
-
-
-RewriteRule ^news/([0-9]+)-([^/]+)\.html?$ news.php?n=$1 [L,QSA]
-RewriteRule ^video/([0-9]+)-([^/]+)\.html?$ video.php?v=$1 [L,QSA]
-RewriteRule ^opinion/([0-9]+)-([-_./a-zA-Z0-9،,ابتثجحخدذرزسشصضءيوهنملكقفغعظطآـــــاçÔÎÛÂâêÊûîôèèٱاًآأإةؤئى]+)\.html?$ opinion.php?o=$1 [L,QSA]
-
-
-RewriteRule ^chaine/?$ chaine.php [L,QSA] 
-RewriteRule ^contact/?$ contact.php [L,QSA]  
-RewriteRule ^regie/?$ regie.php [L,QSA] 
-RewriteRule ^conditions/?$  conditions.php [L,QSA] 
-RewriteRule ^persons/?$ persons.php [L,QSA]
-
-RewriteRule ^sitemap.xml$ sitemap.php [L,QSA]
-RewriteRule ^videositemap.xml$ videositemap.php [L,QSA]
-RewriteRule ^opinionsitemap.xml$ opinionsitemap.php [L,QSA]
-
-
-Options -Indexes
-IndexOptions FancyIndexing
-
-<IfModule mod_deflate.c>
-	AddOutputFilterByType DEFLATE application/atom+xml
-	AddOutputFilterByType DEFLATE application/json
-	AddOutputFilterByType DEFLATE application/xhtml+xml
-	AddOutputFilterByType DEFLATE application/xml
-	AddOutputFilterByType DEFLATE text/css
-	AddOutputFilterByType DEFLATE text/html
-	AddOutputFilterByType DEFLATE text/plain
-	AddOutputFilterByType DEFLATE text/x-component
-	AddOutputFilterByType DEFLATE text/xml
-	# The following MIME types are in the process of registration
-	AddOutputFilterByType DEFLATE application/xslt+xml
-	AddOutputFilterByType DEFLATE image/svg+xml
-	# The following MIME types are NOT registered
-	AddOutputFilterByType DEFLATE application/mathml+xml
-	AddOutputFilterByType DEFLATE application/rss+xml
-	# JavaScript has various MIME types
-	AddOutputFilterByType DEFLATE application/javascript
-	AddOutputFilterByType DEFLATE application/x-javascript
-	AddOutputFilterByType DEFLATE text/ecmascript
-	AddOutputFilterByType DEFLATE text/javascript
-	# .ico files and other compressible images
-	AddOutputFilterByType DEFLATE image/vnd.microsoft.icon
-	AddOutputFilterByType DEFLATE image/x-icon
-	AddOutputFilterByType DEFLATE image/bmp
-	AddOutputFilterByType DEFLATE image/tiff
-	AddOutputFilterByType DEFLATE application/pdf
-	# compressible fonts (.woff is already compressed)
-	AddOutputFilterByType DEFLATE font/opentype
-	AddOutputFilterByType DEFLATE application/x-font-ttf
-	AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
-</IfModule>
-
-<IfModule php8_module>
-   php_flag display_errors Off
-   php_value max_execution_time 1000
-   php_value max_input_time 1000
-   php_value max_input_vars 1000
-   php_value memory_limit 120M
-   php_value post_max_size 120M
-   php_value session.gc_maxlifetime 1440
-   php_value session.save_path "/var/cpanel/php/sessions/ea-php80"
-   php_value upload_max_filesize 300M
-   php_flag zlib.output_compression On
-</IfModule>
-
-<IfModule mod_expires.c>
-	ExpiresActive On
-	ExpiresByType application/json			"access plus 1 year"
-	ExpiresByType application/pdf			"access plus 1 year"
-	ExpiresByType application/x-shockwave-flash	"access plus 1 year"
-	ExpiresByType image/bmp 			"access plus 1 year"
-	ExpiresByType image/gif 			"access plus 1 year"
-	ExpiresByType image/jpeg 			"access plus 1 year"
-	ExpiresByType image/png 			"access plus 1 year"
-	ExpiresByType image/svg+xml 			"access plus 1 year"
-	ExpiresByType image/tiff 			"access plus 1 year"
-	ExpiresByType image/vnd.microsoft.icon 		"access plus 1 year"
-  	ExpiresByType image/x-icon			"access plus 1 year"
-	ExpiresByType text/css 				"access plus 1 year"
-	ExpiresByType video/x-flv 			"access plus 1 year"
-	ExpiresByType application/vnd.bw-fontobject	"access plus 1 year"
-	ExpiresByType application/x-font-ttf		"access plus 1 year"
-	ExpiresByType application/font-woff		"access plus 1 year"
-	ExpiresByType font/opentype			"access plus 1 year"
-	ExpiresByType image/webp			"access plus 1 year"
-	# The following MIME types are in the process of registration
-	ExpiresByType application/xslt+xml		"access plus 1 year"
-	ExpiresByType image/svg+xml			"access plus 1 year"
-	# The following MIME types are NOT registered
-	ExpiresByType application/mathml+xml		"access plus 1 year"
-	ExpiresByType application/rss+xml		"access plus 1 year"
-	# JavaScript has various MIME types
-	ExpiresByType application/x-javascript 		"access plus 1 year"
-	ExpiresByType application/javascript 		"access plus 1 year"
-	ExpiresByType text/ecmascript 			"access plus 1 year"
-	ExpiresByType text/javascript 			"access plus 1 year"
-</IfModule>
-
-<IfModule lsapi_module>
-   php_flag display_errors Off
-   php_value max_execution_time 1000
-   php_value max_input_time 1000
-   php_value max_input_vars 1000
-   php_value memory_limit 120M
-   php_value post_max_size 120M
-   php_value session.gc_maxlifetime 1440
-   php_value session.save_path "/var/cpanel/php/sessions/ea-php80"
-   php_value upload_max_filesize 300M
-   php_flag zlib.output_compression On
-</IfModule>
-
-<IfModule mime_module>
-  AddHandler application/x-httpd-ea-php72___lsphp .php .php7 .phtml
-</IfModule>
-
+# =========================
+# Basic
+# =========================
+Options FollowSymLinks
+Options -Indexes
+AddDefaultCharset UTF-8
+AddType 'text/html; charset=UTF-8' .html
+AddCharset UTF-8 .html
+
+RewriteEngine On
+
+# =========================
+# Detect local environment
+# =========================
+# local if: localhost OR 127.0.0.1 OR *.test OR *.local
+RewriteCond %{HTTP_HOST} ^localhost$ [NC,OR]
+RewriteCond %{HTTP_HOST} ^127\.0\.0\.1$ [NC,OR]
+RewriteCond %{HTTP_HOST} \.test$ [NC,OR]
+RewriteCond %{HTTP_HOST} \.local$ [NC]
+RewriteRule ^ - [E=IS_LOCAL:1]
+
+# =========================
+# Basic
+# =========================
+Options FollowSymLinks
+Options -Indexes
+AddDefaultCharset UTF-8
+AddType 'text/html; charset=UTF-8' .html
+AddCharset UTF-8 .html
+
+RewriteEngine On
+
+# =========================
+# Detect local environment
+# =========================
+# local if: localhost OR 127.0.0.1 OR *.test OR *.local
+RewriteCond %{HTTP_HOST} ^localhost$ [NC,OR]
+RewriteCond %{HTTP_HOST} ^127\.0\.0\.1$ [NC,OR]
+RewriteCond %{HTTP_HOST} \.test$ [NC,OR]
+RewriteCond %{HTTP_HOST} \.local$ [NC]
+RewriteRule ^ - [E=IS_LOCAL:1]
+
+# =========================
+# Production redirects only (NOT local)
+# =========================
+
+# 1) Force HTTPS in production only
+RewriteCond %{ENV:IS_LOCAL} !1
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# 2) Force www in production only
+# (If you don't want www, tell me and I switch it)
+RewriteCond %{ENV:IS_LOCAL} !1
+RewriteCond %{HTTP_HOST} !^www\. [NC]
+RewriteRule ^ https://www.%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# =========================
+# Existing file/dir bypass
+# =========================
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# =========================
+# Your routes
+# =========================
+RewriteRule ^قسم-الأخبار/?$ cat.php?c=1 [L,QSA]
+RewriteRule ^سياسة/?$ cat.php?c=2 [L,QSA]
+RewriteRule ^حوادث/?$ cat.php?c=3 [L,QSA]
+RewriteRule ^إقتصاد/?$ cat.php?c=4 [L,QSA]
+RewriteRule ^رياضة/?$ cat.php?c=5 [L,QSA]
+RewriteRule ^فن-وثقافة/?$ cat.php?c=6 [L,QSA]
+RewriteRule ^مجتمع/?$ cat.php?c=7 [L,QSA]
+RewriteRule ^المرأة/?$ cat.php?c=8 [L,QSA]
+RewriteRule ^صحة/?$ cat.php?c=9 [L,QSA]
+RewriteRule ^سياحة-وسفر/?$ cat.php?c=10 [L,QSA]
+RewriteRule ^فيديو/?$ videos.php?c=11 [L,QSA]
+RewriteRule ^أخبار-دولية/?$ cat.php?c=12 [L,QSA]
+RewriteRule ^سيارات/?$ cat.php?c=13 [L,QSA]
+RewriteRule ^مغاربة-العالم/?$ cat.php?c=14 [L,QSA]
+RewriteRule ^آراء-وتحليلات/?$ cat.php?c=15 [L,QSA]
+
+RewriteRule ^قسم-الأخبار-آخر-الأخبار/?$ cat.php?cat=1&s=15 [L,QSA]
+RewriteRule ^قسم-الأخبار-أخبار-عاجلة/?$ cat.php?cat=1&s=16 [L,QSA]
+
+RewriteRule ^سياسة-المغرب/?$ cat.php?cat=2&s=1 [L,QSA]
+RewriteRule ^سياسة-المغرب-العربي/?$ cat.php?cat=2&s=2 [L,QSA]
+RewriteRule ^سياسة-الشرق-الأوسط/?$ cat.php?cat=2&s=3 [L,QSA]
+RewriteRule ^سياسة-دولي/?$ cat.php?cat=2&s=4 [L,QSA]
+
+RewriteRule ^إقتصاد-المغرب/?$ cat.php?cat=4&s=5 [L,QSA]
+RewriteRule ^إقتصاد-المغرب-العربي/?$ cat.php?cat=4&s=6 [L,QSA]
+RewriteRule ^إقتصاد-الشرق-الأوسط/?$ cat.php?cat=4&s=7 [L,QSA]
+RewriteRule ^إقتصاد-دولي/?$ cat.php?cat=4&s=8 [L,QSA]
+
+RewriteRule ^رياضة-المغرب/?$ cat.php?cat=5&s=10 [L,QSA]
+RewriteRule ^رياضة-العرب/?$ cat.php?cat=5&s=13 [L,QSA]
+RewriteRule ^رياضة-العالم/?$ cat.php?cat=5&s=14 [L,QSA]
+
+RewriteRule ^فن-وثقافة-المغرب/?$ cat.php?cat=6&s=9 [L,QSA]
+RewriteRule ^فن-وثقافة-العرب/?$ cat.php?cat=6&s=11 [L,QSA]
+RewriteRule ^فن-وثقافة-العالم/?$ cat.php?cat=6&s=12 [L,QSA]
+
+RewriteRule ^فيديو-تقارير/?$ videos.php?cat=11&s=17 [L,QSA]
+RewriteRule ^فيديو-ربورطاجات/?$ videos.php?cat=11&s=18 [L,QSA]
+RewriteRule ^فيديو-حوارات/?$ videos.php?cat=11&s=19 [L,QSA]
+RewriteRule ^فيديو-برامج/?$ videos.php?cat=11&s=20 [L,QSA]
+
+RewriteRule ^news/([0-9]+)-([^/]+)\.html?$ news.php?n=$1 [L,QSA]
+RewriteRule ^video/([0-9]+)-([^/]+)\.html?$ video.php?v=$1 [L,QSA]
+RewriteRule ^opinion/([0-9]+)-([-_./a-zA-Z0-9،,ابتثجحخدذرزسشصضءيوهنملكقفغعظطآـــــاçÔÎÛÂâêÊûîôèèٱاًآأإةؤئى]+)\.html?$ opinion.php?o=$1 [L,QSA]
+
+RewriteRule ^chaine/?$ chaine.php [L,QSA]
+RewriteRule ^contact/?$ contact.php [L,QSA]
+RewriteRule ^regie/?$ regie.php [L,QSA]
+RewriteRule ^conditions/?$ conditions.php [L,QSA]
+RewriteRule ^persons/?$ persons.php [L,QSA]
+
+RewriteRule ^sitemap\.xml$ sitemap.php [L,QSA]
+RewriteRule ^videositemap\.xml$ videositemap.php [L,QSA]
+RewriteRule ^opinionsitemap\.xml$ opinionsitemap.php [L,QSA]
+
+# =========================
+# Compression
+# =========================
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/css text/xml application/xml application/json application/javascript text/javascript image/svg+xml
+</IfModule>
+
+# =========================
+# Browser caching
+# =========================
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/gif "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+</IfModule>
