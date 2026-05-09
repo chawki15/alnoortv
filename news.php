@@ -6,7 +6,6 @@
 	.single-inside, .page .main-content {
     width: 1024px;
 }
-
 .twitter-tweet{
 	margin-left: auto;
     margin-right: auto;
@@ -15,7 +14,6 @@
 <body class="bg-repeat font-family">
   	<div class="wrapper">
     <?php include('include/header.php'); ?>
-	   
     	<div class="container-fluid main-content">
 		<main id="posts" class="container single-inside">
           	<div class="row"  style="margin-top: 10px;">
@@ -47,7 +45,6 @@
 											<?php } if($d[1] != ''){ ?>
 												<figcaption><font style="vertical-align: inherit;"><?php echo $d[1] ?></font></figcaption>
 											<?php } ?>
-
 											<div id="fb-root"></div>
 											<script>(function(d, s, id) {
 											var js, fjs = d.getElementsByTagName(s)[0];
@@ -56,12 +53,7 @@
 											js.src = "//connect.facebook.net/en_US/sdk.js#xfbml=1&version=v2.7";
 											fjs.parentNode.insertBefore(js, fjs);
 											}(document, 'script', 'facebook-jssdk'));</script>
-
-
-
 											<center><?php echo $d[3] ?></center>
-
-
 											<!--<div class="fb-post" data-href="<?php echo $d[3] ?>"></div> -->
 										</figure>
 									<?php  } ?>

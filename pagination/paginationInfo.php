@@ -1,17 +1,14 @@
 <?php
   require_once('../admin/assets/func.php');
   $db = connect();
-
   $limit = 15;
   if(isset($_POST['pageNo'])){
       $page = $_POST['pageNo'];
   }else{
       $page = 0;
   }
-
   $sql = "select * from caricature order by id desc limit {$page},$limit";
   $query = mysqli_query($db,$sql);
-
   if(mysqli_num_rows($query) > 0){
     $output = "";
     while($row = mysqli_fetch_assoc($query)){
@@ -34,12 +31,9 @@
     $output .="<div id='pagination' style='vertical-align: top;text-align: center;clear: both;'>
         <button id='ajaxbtn' class='btn btn-outline-success' data-id='{$last_id}'>المزيد</button>
     </div>";
-
     echo $output;
   }else{
       echo '';
   }
-
   mysqli_close($db);
-
 ?>

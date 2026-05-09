@@ -10,7 +10,6 @@
 <body class="bg-repeat font-family">
   	<div class="wrapper">
     <?php include('include/header.php'); ?>
-	   
     	<div class="container-fluid main-content">
 		<main id="posts" class="container single-inside">
           	<div class="row"  style="margin-top: 10px;">

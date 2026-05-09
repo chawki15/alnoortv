@@ -383,144 +383,191 @@ function news_image_path($photo, $size = 1200)
 }
 
 /*------------ SITE ------------*/
+function fetchAllRows($pdo, $sql, array $params = [])
+{
+    if ($pdo instanceof PDO) {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+
+    foreach ($params as $key => $value) {
+        $escaped = mysqli_real_escape_string($pdo, (string)$value);
+        $sql = str_replace($key, "'" . $escaped . "'", $sql);
+    }
+
+    $rows = [];
+    $q = mysqli_query($pdo, $sql);
+    while ($d = mysqli_fetch_array($q)) {
+        $rows[] = $d;
+    }
+    return $rows;
+}
+
+function fetchCountValue($pdo, $sql, array $params = [])
+{
+    if ($pdo instanceof PDO) {
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        $d = $stmt->fetch();
+    } else {
+        foreach ($params as $key => $value) {
+            $escaped = mysqli_real_escape_string($pdo, (string)$value);
+            $sql = str_replace($key, "'" . $escaped . "'", $sql);
+        }
+        $d = mysqli_fetch_array(mysqli_query($pdo, $sql));
+    }
+
+    return (int)($d['nbr'] ?? 0);
+}
 
 function GetFunfNews($pdo,$i)
 {
-    $q = mysqli_query($pdo,'SELECT * FROM news where id_category = "'.$i.'" order by id desc limit 5');
-		while ($d = mysqli_fetch_array($q)) 
-		{
-			$id[] = $d['id'];
-			$titre[] = $d['titre'];
-			$photo[] = news_image_name($d['photo'], 1200);
-			$date[] = $d['date'];
-		}
-	return array($id,$titre,$photo,$date);	
+    $id = []; $titre = []; $photo = []; $date = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE id_category = :category_id ORDER BY id DESC LIMIT 5', [':category_id' => (int)$i]);
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+        $photo[] = news_image_name($d['photo'], 1200);
+        $date[] = $d['date'];
+    }
+    return array($id,$titre,$photo,$date);	
 }
 
 function GetZweiNews($pdo,$i)
 {
-    $q = mysqli_query($pdo,'SELECT * FROM news where id_category = "'.$i.'" order by id desc limit 2');
-		while ($d = mysqli_fetch_array($q)) 
-		{
-			$id[] = $d['id'];
-			$titre[] = $d['titre'];
-			$photo[] = news_image_name($d['photo'], 1200);
-			$date[] = $d['date'];
-		}
-	return array($id,$titre,$photo,$date);	
+    $id = []; $titre = []; $photo = []; $date = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE id_category = :category_id ORDER BY id DESC LIMIT 2', [':category_id' => (int)$i]);
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+        $photo[] = news_image_name($d['photo'], 1200);
+        $date[] = $d['date'];
+    }
+    return array($id,$titre,$photo,$date);
 }
 
 function NbrAkhbar($pdo,$i)
 {
-    $q = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM news where id_category = "'.$i.'"'));
-	return $q['nbr'];
+     return fetchCountValue($pdo, 'SELECT count(*) as nbr FROM news WHERE id_category = :category_id', [':category_id' => (int)$i]);
 }
 
-function GetMustajidaat($pdo){
-	$q = mysqli_query($pdo,'SELECT * FROM news where mustajidaat = "2" order by id desc limit 9');
-	while ($d = mysqli_fetch_array($q)) 
-	{
-		$id[] = $d['id'];
-		$titre[] = $d['titre'];
-	}
-	return array($id,$titre);				
+function GetMustajidaat($pdo)
+{
+	$id = []; $titre = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE mustajidaat = "2" ORDER BY id DESC LIMIT 9');
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+    }
+    return array($id,$titre);			
 }
 
-function GetLatestNews($pdo){
-	$q = mysqli_query($pdo,'SELECT * FROM news where latestNews = "2" order by id desc limit 9');
-	while ($d = mysqli_fetch_array($q)) 
-	{
-		$id[] = $d['id'];
-		$titre[] = $d['titre'];
-		$photo[] = news_image_name($d['photo'], 1200);
-		$date[] = $d['date'];
-	}
-	return array($id,$titre,$photo,$date);				
+function GetLatestNews($pdo)
+{
+	 $id = []; $titre = []; $photo = []; $date = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE latestNews = "2" ORDER BY id DESC LIMIT 9');
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+        $photo[] = news_image_name($d['photo'], 1200);
+        $date[] = $d['date'];
+    }
+    return array($id,$titre,$photo,$date);			
 }
 
-function GetOpinion($pdo){
-	$l = mysqli_query($pdo,'SELECT * FROM opinion order by id desc limit 6');
-		while ($l2 = mysqli_fetch_array($l)) 
-		{
-			$id[] = $l2['id'];
-			$idwriter[] =$l2['id_writer'];
-			$titre[] = $l2['titre'];
-		}
-		
-		return array($id,$idwriter,$titre);	
+function GetOpinion($pdo)
+{
+	$id = []; $idwriter = []; $titre = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM opinion ORDER BY id DESC LIMIT 6');
+    foreach ($rows as $l2) {
+        $id[] = $l2['id'];
+        $idwriter[] = $l2['id_writer'];
+        $titre[] = $l2['titre'];
+    }
+    return array($id,$idwriter,$titre);
 }
 
-function GetInfo($pdo){
-	$y = mysqli_query($pdo,'SELECT * FROM caricature order by id desc limit 10');
-		while ($y2 = mysqli_fetch_array($y)) 
-		{
-			$id[] = $y2['id'];
-			$photo[] = $y2['photo'];
-			$titre[] = $y2['titre'];
-		}
-		
-		return array($id,$photo,$titre);	
+function GetInfo($pdo)
+{
+	$id = []; $photo = []; $titre = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM caricature ORDER BY id DESC LIMIT 10');
+    foreach ($rows as $y2) {
+        $id[] = $y2['id'];
+        $photo[] = $y2['photo'];
+        $titre[] = $y2['titre'];
+    }
+    return array($id,$photo,$titre);	
 }
 
-function  Urgent($pdo){
-	$q = mysqli_query($pdo,'SELECT * FROM news where urgent = "2" and date > DATE_SUB(NOW(), INTERVAL 10 MINUTE) order by date desc limit 5');
-	while ($d = mysqli_fetch_array($q)) 
-	{
-		$id[] = $d['id'];
-		$titre[] = $d['titre'];
-	}
-	return array($id,$titre);	
+function  Urgent($pdo)
+{
+	$id = []; $titre = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE urgent = "2" AND date > DATE_SUB(NOW(), INTERVAL 10 MINUTE) ORDER BY date DESC LIMIT 5');
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+    }
+    return array($id,$titre);
 }
 
-function CountUrgent($pdo){
-	$d = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM news where urgent = "2" and date > DATE_SUB(NOW(), INTERVAL 10 MINUTE)'));
-	return $d['nbr'];
+function CountUrgent($pdo)
+{
+	return fetchCountValue($pdo, 'SELECT count(*) as nbr FROM news WHERE urgent = "2" AND date > DATE_SUB(NOW(), INTERVAL 10 MINUTE)');
 }
 
-function MostWatchedDay($pdo){
-	$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date LIKE "'.date("Y-m-d").'%" order by nVues desc  limit 9');
-	while ($d = mysqli_fetch_array($q)) 
-	{
-		$id[] = $d['id'];
-		$titre[] = $d['titre'];
-		$photo[] = news_image_name($d['photo'], 1200);
-		$nVues[] = $d['nVues'];
-	}
-	return array($id,$titre,$photo,$nVues);				
+function MostWatchedDay($pdo)
+{
+	$id = []; $titre = []; $photo = []; $nVues = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE id_category NOT IN (SELECT id FROM categories WHERE id = "11" OR id = "15") AND date LIKE :today ORDER BY nVues DESC LIMIT 9', [':today' => date("Y-m-d") . '%']);
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+        $photo[] = news_image_name($d['photo'], 1200);
+        $nVues[] = $d['nVues'];
+    }
+    return array($id,$titre,$photo,$nVues);			
 }
 
-function  Last24hours($pdo){
-	$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date > DATE_SUB(NOW(), INTERVAL 24 HOUR) order by nVues desc  limit 10');
-	while ($d = mysqli_fetch_array($q)) 
-	{
-		$id[] = $d['id'];
-		$titre[] = $d['titre'];
-		$photo[] = news_image_name($d['photo'], 1200);
-		$nVues[] = $d['nVues'];
-		$date[] = $d['date'];
-	}
-	return array($id,$titre,$photo,$nVues,$date);	
+function  Last24hours($pdo)
+{
+	$id = []; $titre = []; $photo = []; $nVues = []; $date = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE id_category NOT IN (SELECT id FROM categories WHERE id = "11" OR id = "15") AND date > DATE_SUB(NOW(), INTERVAL 24 HOUR) ORDER BY nVues DESC LIMIT 10');
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+        $photo[] = news_image_name($d['photo'], 1200);
+        $nVues[] = $d['nVues'];
+        $date[] = $d['date'];
+    }
+    return array($id,$titre,$photo,$nVues,$date);	
 }
 
-function MostWatchedWeek($pdo){
-	$startDate = time();
-	$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date between  "'.date('Y-m-d', strtotime('-7 day', $startDate)).'" and "'.date("Y-m-d").'"   order by nVues desc  limit 10');
-	while ($d = mysqli_fetch_array($q)) 
-	{
-		$id[] = $d['id'];
-		$titre[] = $d['titre'];
-		$photo[] = news_image_name($d['photo'], 1200);
-		$nVues[] = $d['nVues'];
-	}
-	return array($id,$titre,$photo,$nVues);				
+function MostWatchedWeek($pdo)
+{
+	$id = []; $titre = []; $photo = []; $nVues = [];
+    $startDate = time();
+    $rows = fetchAllRows(
+        $pdo,
+        'SELECT * FROM news WHERE id_category NOT IN (SELECT id FROM categories WHERE id = "11" OR id = "15") AND date BETWEEN :start_date AND :end_date ORDER BY nVues DESC LIMIT 10',
+        [':start_date' => date('Y-m-d', strtotime('-7 day', $startDate)), ':end_date' => date("Y-m-d")]
+    );
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+        $photo[] = news_image_name($d['photo'], 1200);
+        $nVues[] = $d['nVues'];
+    }
+    return array($id,$titre,$photo,$nVues);			
 }
 
-function MostWatched($pdo){
-	$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") order by nVues desc  limit 9');
-	while ($d = mysqli_fetch_array($q)) 
-	{
-		$id[] = $d['id'];
-		$titre[] = $d['titre'];
+function MostWatched($pdo)
+{
+	$id = []; $titre = []; $photo = []; $nVues = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE id_category NOT IN (SELECT id FROM categories WHERE id = "11" OR id = "15") ORDER BY nVues DESC LIMIT 9');
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
 		$photo[] = news_image_name($d['photo'], 1200);
 		$nVues[] = $d['nVues'];
 	}
@@ -529,21 +576,20 @@ function MostWatched($pdo){
 
 function GetVideo($pdo)
 {
-    $q = mysqli_query($pdo,'SELECT * FROM news where id_category = "11" order by id desc limit 5');
-		while ($d = mysqli_fetch_array($q)) 
-		{
-			$id[] = $d['id'];
-			$titre[] = $d['titre'];
-			$photo[] = news_image_name($d['photo'], 1200);
-			$url[] = $d['urlVideo'];
-		}
-	return array($id,$titre,$photo,$url);	
+    $id = []; $titre = []; $photo = []; $url = [];
+    $rows = fetchAllRows($pdo, 'SELECT * FROM news WHERE id_category = "11" ORDER BY id DESC LIMIT 5');
+    foreach ($rows as $d) {
+        $id[] = $d['id'];
+        $titre[] = $d['titre'];
+        $photo[] = news_image_name($d['photo'], 1200);
+        $url[] = $d['urlVideo'];
+    }
+    return array($id,$titre,$photo,$url);	
 }
 
 function GetTotalVideo($pdo)
 {	
-	$d = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM news where id_category = "11"'));
-	return $d['nbr'];
+	return fetchCountValue($pdo, 'SELECT count(*) as nbr FROM news WHERE id_category = "11"');
 }
 
 function GetSousMenuByMenu($pdo,$ids)

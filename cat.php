@@ -1,16 +1,13 @@
 <?php include('req.php') ?>
-
 <body class="bg-repeat font-family">
 	<div class="wrapper">
 		<?php include('include/header.php') ?>
-
 		<div class="container">
 			<div class="row" style="margin-top: 10px;">
 				<div class="col-lg-9 col-md-12 col-sm-12">
 					<div class="row">
 						<div class="col-lg-12">
 							<div class="block-area">
-
 								<header class="title">
 									<a href="">
 										<?php echo $nomcat;  ?>
@@ -18,19 +15,15 @@
 									</a>
 								</header>
 								<div class="loadData" style="margin-top: 5px;">
-
 									<?php 
-					
 						$limit = 30;
 						$c = ' id_category ="'.$cat.'"';
 						if($nomsouscat != ''){ if($souscat == ''){ $s = ''; }else{ $s = ' and id_sousCategory ="'.$souscat.'"';} }else{ $s = ''; }
 						$sql = "select * from news where ".$c." ".$s." order by id desc limit ".$limit."";
 						$query = mysqli_query($pdo,$sql);
-
 						if(mysqli_num_rows($query) > 0){ 
 							while($row = mysqli_fetch_assoc($query)){
 								$last_id = $row["id"]; ?>
-
 									<article class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
 										<div class="overlay card">
 											<div class="cover">
@@ -80,7 +73,6 @@
 									<?php } ?>
 								</div>
 							</div>
-
 						</div>
 					</div>
 				</div>
@@ -89,16 +81,11 @@
 				</div>
 			</div>
 		</div>
-
-
 		<?php include('include/footer.php') ?>
 	</div>
 	<a class="material-scrolltop back-top btn btn-light border position-fixed r-1 b-1" href="#"><i
 			class="fa fa-arrow-up"></i></a>
-
 	<?php include('include/script.php') ?>
-
-
 	<script>
 		$(document).ready(function ($) {
 			$(document).on('click', '.ajaxbtn', function () {
@@ -121,8 +108,5 @@
 			});
         });
 	</script>
-
-
 </body>
-
 </html>

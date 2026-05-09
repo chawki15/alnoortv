@@ -2,19 +2,13 @@
   session_start();
   require_once('../admin/assets/func.php');
   $db = connect();
-
   $limit = 15;
   $c = ' id_category ="'.$_POST['cat'].'"';
   if($_POST['souscat'] == '0'){ $s = ''; }else{ $s = ' and id_sousCategory ="'. $_POST['souscat'].'"';}
-
   $d = mysqli_fetch_array(mysqli_query($db,"SELECT COUNT(*) AS total FROM  news where id < ".$_POST['pageNo']." and ".$c." ".$s." ")); 
   $total=$d['total'];
-
-
-
   $sql = "select * from news where id < ".$_POST['pageNo']." and ".$c." ".$s."  order by id desc limit ".$limit."";
   $query = mysqli_query($db,$sql);
-
   if(mysqli_num_rows($query) > 0){
     $output = "";
     while($row = mysqli_fetch_assoc($query)){
@@ -64,12 +58,9 @@
     $output .="<div id='pagination' style='vertical-align: top;text-align: center;clear: both;'>
         <button  class='btn btn-outline-success ajaxbtn' data-id='{$last_id}'>المزيد</button>
     </div>";
-
     echo $output;
   }else{
       echo '';
   }
-
   mysqli_close($db);
-
 ?>

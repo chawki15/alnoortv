@@ -1250,4 +1250,163 @@ font-size: 1.2rem;
   background-color: #fff !important;
 }
 
+/* Homepage-specific styles moved from index.php. */
+.tbb {
+  position: relative;
+  height: 430px;
+}
 
+@media (min-width: 567px) {
+  .tbb {
+    height: 510px;
+  }
+}
+
+@media (max-width: 567px) {
+  .tbb {
+    height: 510px;
+  }
+}
+
+@media (min-width: 768px) {
+  .tbb {
+    height: 510px;
+  }
+}
+
+@media (min-width: 992px) {
+  .tbb {
+    height: 430px;
+  }
+}
+
+.table {
+  caption-side: bottom;
+  border-collapse: collapse;
+  width: 70%;
+  margin-bottom: 1rem;
+  vertical-align: top;
+}
+
+.tb {
+  padding: 1rem 1rem;
+  margin-right: 22px;
+  color: #fff;
+  text-shadow: #343a40 2px 2px;
+  min-height: 12em;
+  position: relative;
+}
+
+.tbb::before {
+  background-image: url("img/5dc4a6d11c2e9.jpg");
+  background-size: cover;
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  opacity: 0.8;
+}
+
+.tbb::after {
+  background-color: #444346;
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.4;
+}
+
+.tb::before {
+  content: "";
+  display: block;
+  position: absolute;
+  margin-left: 0;
+  min-width: 76%;
+  min-height: 15em;
+  z-index: -1;
+  opacity: 0.4;
+  background-color: #bec7cf;
+}
+
+.tbb select {
+  -webkit-appearance: none;
+  padding: 7px 40px 7px 12px;
+  width: 100%;
+  border: 1px solid #e8eaed;
+  border-radius: 5px;
+  background: #fff;
+  box-shadow: 0 1px 3px -2px #9098a9;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  transition: all 150ms ease;
+}
+
+h3,
+.h3 {
+  font-size: 1.06rem;
+}
+
+.popular-posts .card-img-top {
+  width: 45%;
+  margin: 0 0 0 10px;
+}
+
+.popular-posts .card {
+  display: flex;
+  flex-direction: row;
+  padding: 10px 0;
+}
+
+.popular-posts .wpp-list-with-thumbnails li {
+  border-bottom: none;
+  margin-bottom: 0.9375rem;
+  padding: 0;
+}
+
+.popular-posts ul {
+  padding: 0;
+  list-style: none !important;
+}
+
+.popular-posts ul li {
+  position: relative;
+  margin-bottom: 0;
+  padding: 10px 0;
+  display: flex;
+}
+
+.popular-posts ul li:last-child {
+  border: none;
+}
+
+.popular-posts ul .wpp-thumbnail {
+  width: 200px;
+  height: 133px;
+  margin: 0 0 0 10px;
+}
+
+@media (min-width: 768px) and (max-width: 991.98px) {
+  .popular-posts .card,
+  .live-box .card {
+    flex-direction: column;
+  }
+
+  .popular-posts .card-img-top,
+  .live-box .card-img-top {
+    width: 100%;
+  }
+}
+
+.labelPerm {
+  font-family: "Kalligraaf Arabic Medium";
+  color: #fff;
+}
