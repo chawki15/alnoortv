@@ -1,15 +1,15 @@
 <?php
 include('req.php');
 
-if (!loggedAdmin($db)) {
+if (!loggedAdmin($pdo)) {
     header('Location: index.php');
     exit;
 }
 
 $limit = isset($_GET['limit']) ? max(0, (int)$_GET['limit']) : 0;
-//$result = migrate_news_images_to_webp_sizes($db, $limit);
+//$result = migrate_news_images_to_webp_sizes($pdo, $limit);
 
-$result = update_news_photo_db_type_to_webp($db, $limit);
+$result = update_news_photo_db_type_to_webp($pdo, $limit);
 
 
 

@@ -35,7 +35,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                             <select class="form-control" name="selectCategory" id="selectCategory">
                                 <option value="">اسم الفئة</option>
                                 <?php 
-                                    list($id,$name) = GetAdminCategories($db);
+                                    list($id,$name) = GetAdminCategories($pdo);
                                     for($i=0;$i<sizeof($id);$i++)
                                     {
                                 ?> 

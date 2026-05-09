@@ -4,19 +4,19 @@ include('req.php');
 $perPage = 100;
 $currentPage = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $offset = ($currentPage - 1) * $perPage;
-$isSuperAdmin = loggedAdmin($db);
-$currentAdminId = (int) GetIdUser($db);
-$missingImagesCount = $isSuperAdmin ? count_missing_news_images($db) : 0;
+$isSuperAdmin = loggedAdmin($pdo);
+$currentAdminId = (int) GetIdUser($pdo);
+$missingImagesCount = $isSuperAdmin ? count_missing_news_images($pdo) : 0;
 
 $rows = [];
 $totalRows = 0;
 
-if ($db instanceof PDO) {
+if ($pdo instanceof PDO) {
   if ($isSuperAdmin) {
-    $countStmt = $db->query('SELECT COUNT(*) FROM news WHERE id_category NOT IN (11,15)');
+    $countStmt = $pdo->query('SELECT COUNT(*) FROM news WHERE id_category NOT IN (11,15)');
     $totalRows = (int) $countStmt->fetchColumn();
 
-    $stmt = $db->prepare('
+    $stmt = $pdo->prepare('
       SELECT n.id, n.titre, n.photo, n.id_pseudo, n.id_category, a.name AS author_name, c.name AS category_name
       FROM news n
       LEFT JOIN admin a ON a.id = n.id_pseudo
@@ -29,11 +29,11 @@ if ($db instanceof PDO) {
     $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
     $stmt->execute();
   } else {
-    $countStmt = $db->prepare('SELECT COUNT(*) FROM news WHERE id_pseudo = :admin_id AND id_category NOT IN (11,15)');
+    $countStmt = $pdo->prepare('SELECT COUNT(*) FROM news WHERE id_pseudo = :admin_id AND id_category NOT IN (11,15)');
     $countStmt->execute([':admin_id' => $currentAdminId]);
     $totalRows = (int) $countStmt->fetchColumn();
 
-    $stmt = $db->prepare('
+    $stmt = $pdo->prepare('
       SELECT n.id, n.titre, n.photo, n.id_pseudo, n.id_category, a.name AS author_name, c.name AS category_name
       FROM news n
       LEFT JOIN admin a ON a.id = n.id_pseudo
@@ -83,7 +83,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
             </div>
           </div>
           <div class="content-header-right col-md-2 col-12 btn-add">
-            <?php if(loggedAdmin($db)){ ?>
+            <?php if(loggedAdmin($pdo)){ ?>
                <a class="btn btn-sm round btn-outline-primary btn-glow mb-1" href="migrateNewsImages.php">تحديث صور الأخبار</a>
                 <span class="badge badge-warning d-block mt-1">الصور غير الموجودة: <?php echo (int)$missingImagesCount; ?></span>
             <?php } ?>
@@ -106,7 +106,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                     <table id="list" class="table table-striped table-bordered zero-configuration">
                       <thead>
                         <tr>
-                        <?php if(loggedAdmin($db)){ ?>
+                        <?php if(loggedAdmin($pdo)){ ?>
                           <th style="width: 15%;">الكاتب</th>
                         <?php }else{ ?>
                           <th style="width: 15%;">الرقم</th>
@@ -130,7 +130,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                            $photoExists = ($photoName !== '') && is_file(__DIR__ . '/../assets/img/news/' . $photoName);
                         ?>
                         <tr>
-                        <?php if(loggedAdmin($db)){ ?>
+                        <?php if(loggedAdmin($pdo)){ ?>
                           <td><?php echo $author; ?></td>
                         <?php }else{ ?>
                           <td><?php echo $id; ?></td>

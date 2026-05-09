@@ -39,10 +39,10 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                         </tr>
                       </thead>
                       <tbody>
-                       <?php list($id,$idcat,$name) = GetAdminSousMenu($db); for($i=0;$i<sizeof($id);$i++){ ?>
+                       <?php list($id,$idcat,$name) = GetAdminSousMenu($pdo); for($i=0;$i<sizeof($id);$i++){ ?>
                         <tr>
                           <td><?php  echo $id[$i];?></td>
-                          <td><?php  echo GetTableByID($db,'categories','name',$idcat[$i]);?></td>
+                          <td><?php  echo GetTableByID($pdo,'categories','name',$idcat[$i]);?></td>
                           <td><?php  echo $name[$i]?></td>
                           <td>
                             <a class="btn btn-sm btn-outline-info round" href="modSouscat.php?u=<?php  echo $id[$i];?>">تعديل</a>

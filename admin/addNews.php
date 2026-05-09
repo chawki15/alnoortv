@@ -37,17 +37,17 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                               <select class="form-control" name="selectCategory" id="selectCategory">
                                     <option value="">اسم الفئة</option>
                                     <?php 
-                                        list($id,$name) = GetAdminMenuNews($db);
+                                        list($id,$name) = GetAdminMenuNews($pdo);
                                         for($i=0;$i<sizeof($id);$i++)
                                         {
-                                          $f = CountSousMenuByMenu($db,$id[$i]);
+                                          $f = CountSousMenuByMenu($pdo,$id[$i]);
 
                                           if($f == 0){
                                     ?>
                                           <option value="<?php echo $id[$i].'#' ?>" ><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><?php  echo $name[$i] ?></font></font></option>
                                           <?php
                                           }else{
-                                          list($idss,$idcats,$nom)  = GetSousMenuByMenu($db,$id[$i]);
+                                          list($idss,$idcats,$nom)  = GetSousMenuByMenu($pdo,$id[$i]);
                                           for($j=0;$j<sizeof($idss);$j++)
                                         {
                                     ?> 

@@ -1,14 +1,14 @@
 <?php
   session_start();
   require_once('../func.php');
-  $db = connect();
+  $pdo = connect();
 
 if($_POST['act']=='seoCat'){
     if(((!validate_Text($_POST['keyWordSeo']))&&(trim($_POST['keyWordSeo'])!=''))||(trim($_POST['descSeo'])=='')||(!validate_Text($_POST['descSeo']))){
         if(trim($_POST['descSeo'])==''){ echo " des "; }elseif(!validate_Text($_POST['descSeo'])){ echo " vdes "; }
         if((!validate_Text($_POST['keyWordSeo']))&&(trim($_POST['keyWordSeo'])!='')){ echo " key "; }
     }else{
-        mysqli_query($db, 'UPDATE categories SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
+        mysqli_query($pdo, 'UPDATE categories SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
               echo " addSeo ";
               echo " ./afficherCat.php ";
     }
@@ -17,7 +17,7 @@ if($_POST['act']=='seoCat'){
         if(trim($_POST['descSeo'])==''){ echo " des "; }elseif(!validate_Text($_POST['descSeo'])){ echo " vdes "; }
         if((!validate_Text($_POST['keyWordSeo']))&&(trim($_POST['keyWordSeo'])!='')){ echo " key "; }
     }else{
-        mysqli_query($db, 'UPDATE sous_categories SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
+        mysqli_query($pdo, 'UPDATE sous_categories SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
               echo " addSeo ";
               echo " ./afficherSousCat.php ";
     }
@@ -26,7 +26,7 @@ if($_POST['act']=='seoCat'){
         if(trim($_POST['descSeo'])==''){ echo " des "; }elseif(!validate_Text($_POST['descSeo'])){ echo " vdes "; }
         if((!validate_Text($_POST['keyWordSeo']))&&(trim($_POST['keyWordSeo'])!='')){ echo " key "; }
     }else{
-        mysqli_query($db, 'UPDATE news SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
+        mysqli_query($pdo, 'UPDATE news SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
               echo " addSeo ";
               echo " ./afficherNews.php ";
     }
@@ -35,7 +35,7 @@ if($_POST['act']=='seoCat'){
         if(trim($_POST['descSeo'])==''){ echo " des "; }elseif(!validate_Text($_POST['descSeo'])){ echo " vdes "; }
         if((!validate_Text($_POST['keyWordSeo']))&&(trim($_POST['keyWordSeo'])!='')){ echo " key "; }
     }else{
-        mysqli_query($db, 'UPDATE news SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
+        mysqli_query($pdo, 'UPDATE news SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
               echo " addSeo ";
               echo " ./afficherDialogue.php ";
     }
@@ -44,7 +44,7 @@ if($_POST['act']=='seoCat'){
         if(trim($_POST['descSeo'])==''){ echo " des "; }elseif(!validate_Text($_POST['descSeo'])){ echo " vdes "; }
         if((!validate_Text($_POST['keyWordSeo']))&&(trim($_POST['keyWordSeo'])!='')){ echo " key "; }
     }else{
-        mysqli_query($db, 'UPDATE news SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
+        mysqli_query($pdo, 'UPDATE news SET SeoDescription="'.addslashes($_POST['descSeo']).'" , SeoKeywords="'.addslashes($_POST['keyWordSeo']).'" where id ='.$_POST['id']);
               echo " addSeo ";
               echo " ./afficherReportage.php ";
     }

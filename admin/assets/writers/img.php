@@ -1,45 +1,138 @@
-<?php 
-    if(isset($_FILES["1"]["type"])&&($_FILES["1"]["name"]!='')):
-    	$width = 200; $height = 269;
-		$allowed_ext = array("image/png", "image/jpg", "image/jpeg");
-		if(in_array($_FILES["1"]["type"], $allowed_ext))
-		  {
-		   $new_image = '';
-		   $new_name = 'thumbs'.md5(rand()) . '.jpg';
-		   echo $new_name;
-		   $path = '../../../assets/img/writers/' . $new_name;
+<?php
+$targetWidth = 400;
+$targetHeight = 400;
+$allowedTypes = [
+    'image/png' => IMAGETYPE_PNG,
+    'image/jpg' => IMAGETYPE_JPEG,
+    'image/jpeg' => IMAGETYPE_JPEG,
+    'image/webp' => IMAGETYPE_WEBP,
+];
 
-		    list($width_orig, $height_orig, $source_image_type) = getimagesize($_FILES["1"]["tmp_name"]);
+function writer_image_filename(string $writerName): string
+{
+    $baseName = trim($writerName);
+    $baseName = function_exists('mb_strtolower') ? mb_strtolower($baseName, 'UTF-8') : strtolower($baseName);
+    $baseName = preg_replace('/[^\p{L}\p{N}_-]+/u', '-', $baseName);
+    $baseName = preg_replace('/-+/', '-', (string)$baseName);
+    $baseName = trim((string)$baseName, '-_');
 
-			$ratio_orig = $width_orig/$height_orig;
+    if($baseName === ''){
+        $baseName = 'writer-' . date('YmdHis');
+    }
 
-			if ($width/$height > $ratio_orig) {
-			   $width = $height*$ratio_orig;
-			} else {
-			   $height = $width/$ratio_orig;
-			}
+    return $baseName . '-author.webp';
+}
 
-			$image_p = imagecreatetruecolor($width, $height);
+function unique_writer_image_path(string $directory, string $filename): array
+{
+    $path = $directory . $filename;
+    if(!file_exists($path)){
+        return [$filename, $path];
+    }
 
-			switch ($source_image_type) {
-		        case IMAGETYPE_GIF:
-		            $source_gd_image = imagecreatefromgif($_FILES["1"]["tmp_name"]);
-		            break;
-		        case IMAGETYPE_JPEG:
-		            $source_gd_image = imagecreatefromjpeg($_FILES["1"]["tmp_name"]);
-		            break;
-		        case IMAGETYPE_PNG:
-		            $source_gd_image = imagecreatefrompng($_FILES["1"]["tmp_name"]);
-		            break;
-		    }
+    $baseName = pathinfo($filename, PATHINFO_FILENAME);
+    $counter = 1;
+    do {
+        $candidate = $baseName . '-' . $counter . '.webp';
+        $path = $directory . $candidate;
+        $counter++;
+    } while(file_exists($path));
 
-			imagecopyresampled($image_p, $source_gd_image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+    return [$candidate, $path];
+}
 
-			header ("Content-type: image/jpeg");
-			imagejpeg($image_p, $path,100);
-			imagedestroy($image_p);
-	  } 
-	endif;
-	
-	
-    ?>
+function create_writer_source_image(string $tmpName, int $imageType)
+{
+    switch ($imageType) {
+        case IMAGETYPE_JPEG:
+            return imagecreatefromjpeg($tmpName);
+        case IMAGETYPE_PNG:
+            return imagecreatefrompng($tmpName);
+        case IMAGETYPE_WEBP:
+            return function_exists('imagecreatefromwebp') ? imagecreatefromwebp($tmpName) : false;
+        default:
+            return false;
+    }
+}
+
+if(isset($_FILES['1']['type']) && ($_FILES['1']['name'] ?? '') !== ''){
+    if(!function_exists('imagewebp')){
+        http_response_code(500);
+        echo 'webp_not_supported';
+        exit;
+    }
+
+    $mimeType = $_FILES['1']['type'];
+    if(!isset($allowedTypes[$mimeType])){
+        http_response_code(415);
+        echo 'invalid_type';
+        exit;
+    }
+
+    $imageInfo = getimagesize($_FILES['1']['tmp_name']);
+    if($imageInfo === false || !in_array($imageInfo[2], $allowedTypes, true)){
+        http_response_code(415);
+        echo 'invalid_image';
+        exit;
+    }
+
+    $sourceGdImage = create_writer_source_image($_FILES['1']['tmp_name'], $imageInfo[2]);
+    if(!$sourceGdImage){
+        http_response_code(415);
+        echo 'invalid_image';
+        exit;
+    }
+
+    $widthOrig = (int)$imageInfo[0];
+    $heightOrig = (int)$imageInfo[1];
+    $sourceRatio = $widthOrig / $heightOrig;
+    $targetRatio = $targetWidth / $targetHeight;
+
+    if($sourceRatio > $targetRatio){
+        $cropHeight = $heightOrig;
+        $cropWidth = (int)round($heightOrig * $targetRatio);
+        $srcX = (int)round(($widthOrig - $cropWidth) / 2);
+        $srcY = 0;
+    }else{
+        $cropWidth = $widthOrig;
+        $cropHeight = (int)round($widthOrig / $targetRatio);
+        $srcX = 0;
+        $srcY = (int)round(($heightOrig - $cropHeight) / 2);
+    }
+
+    $resizedImage = imagecreatetruecolor($targetWidth, $targetHeight);
+    imagealphablending($resizedImage, true);
+    imagesavealpha($resizedImage, true);
+
+    imagecopyresampled(
+        $resizedImage,
+        $sourceGdImage,
+        0,
+        0,
+        $srcX,
+        $srcY,
+        $targetWidth,
+        $targetHeight,
+        $cropWidth,
+        $cropHeight
+    );
+
+    $directory = '../../../assets/img/writers/';
+    if(!is_dir($directory)){
+        mkdir($directory, 0755, true);
+    }
+
+    [$newName, $path] = unique_writer_image_path($directory, writer_image_filename($_POST['nom'] ?? ''));
+    if(!imagewebp($resizedImage, $path, 90)){
+        http_response_code(500);
+        echo 'upload_error';
+        imagedestroy($sourceGdImage);
+        imagedestroy($resizedImage);
+        exit;
+    }
+
+    imagedestroy($sourceGdImage);
+    imagedestroy($resizedImage);
+    echo $newName;
+}
+?>

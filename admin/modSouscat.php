@@ -28,7 +28,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                   <div class="card-body">
                     <form class="form form-horizontal" id="sousCat">
                     <input type="hidden" name="act" value="modSousCat">
-                    <input type="hidden" name="id" value="<?php echo $_GET['u']; ?>">
+                    <input type="hidden" name="id" value="<?php echo htmlspecialchars((string)($uId ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                       <div class="form-body">
                         <div class="form-group row">
                           <label class="col-md-3 label-control" for="eventRegInput1">اختر اسم الفئة</label>
@@ -36,7 +36,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                             <select class="form-control" name="selectCategory" id="selectCategory">
                                 <option value="">اسم الفئة</option>
                                 <?php 
-                                    list($id,$name) = GetAdminMenu($db);
+                                    list($id,$name) = GetAdminMenu($pdo);
                                     for($i=0;$i<sizeof($id);$i++)
                                     {
                                       if($id[$i] == $cat){ ?>

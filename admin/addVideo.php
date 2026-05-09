@@ -38,10 +38,10 @@
                                 <select class="form-control" name="selectCategory" id="selectCategory">
                                   <option value="">اسم الفئة</option>
                                   <?php 
-                                        list($id,$name) = GetAdminVedions($db);
+                                        list($id,$name) = GetAdminVedions($pdo);
                                         for($i=0;$i<sizeof($id);$i++)
                                         {
-                                          $f = CountSousMenuByMenu($db,$id[$i]);
+                                          $f = CountSousMenuByMenu($pdo,$id[$i]);
 
                                           if($f == 0){
                                     ?>
@@ -52,7 +52,7 @@
                                   </option>
                                   <?php
                                           }else{
-                                          list($idss,$idcats,$nom)  = GetSousMenuByMenu($db,$id[$i]);
+                                          list($idss,$idcats,$nom)  = GetSousMenuByMenu($pdo,$id[$i]);
                                           for($j=0;$j<sizeof($idss);$j++)
                                         {
                                     ?>

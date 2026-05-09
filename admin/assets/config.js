@@ -641,12 +641,12 @@ showSuccessMessage("تم تعديل البيانات بنجاح", function(){ wi
 
           if (each[e] == "et") {
             $("#title").css({ border: "2px solid #DA2128" });
-            $("#checkTitle").html("من فضلك ادخل اسم الفئة");
+            $("#checkTitle").html("من فضلك ادخل عنوان المقال");
             $("#checkTitle").css({ color: "#FF4961" });
             $("#checkTitle").fadeIn("slow");
           } else if (each[e] == "vt") {
             $("#title").css({ border: "2px solid #DA2128" });
-            $("#checkTitle").html("الرجاء إدخال اسم الفئة بالعربية");
+            $("#checkTitle").html("الرجاء إدخال عنوان المقال بالعربية");
             $("#checkTitle").css({ color: "#FF4961" });
             $("#checkTitle").fadeIn("slow");
           }
@@ -654,19 +654,19 @@ showSuccessMessage("تم تعديل البيانات بنجاح", function(){ wi
           
           if (each[e] == "cl") {
             $("#selectNom").css({ border: "2px solid #DA2128" });
-            $("#checkNom").html("من فضلك اختر اسم الفئة");
+            $("#checkNom").html("من فضلك اختر  اسم الكاتب");
             $("#checkNom").css({ color: "#FF4961" });
             $("#checkNom").fadeIn("slow");
-          } 
+          }
 
           if (each[e] == "ed") {
             $("#desc").css({ border: "2px solid #DA2128" });
-            $("#checkDescription").html("من فضلك ادخل اسم الفئة");
+            $("#checkDescription").html("من فضلك ادخل الموضوع");
             $("#checkDescription").css({ color: "#FF4961" });
             $("#checkDescription").fadeIn("slow");
           } else if (each[e] == "vd") {
             $("#desc").css({ border: "2px solid #DA2128" });
-            $("#checkDescription").html("الرجاء إدخال اسم الفئة بالعربية");
+            $("#checkDescription").html("الرجاء إدخال الموضوع بالعربية");
             $("#checkDescription").css({ color: "#FF4961" });
             $("#checkDescription").fadeIn("slow");
           }

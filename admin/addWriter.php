@@ -42,10 +42,10 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                           <div class="col-md-9">
                             <div class="list">
                                   <div class="group-image image-1">
-                                    <input name="1" onchange="readURL();" id="1" type="file" accept="image/jpeg,image/png">
+                                    <input name="1" onchange="readURL();" id="1" type="file" accept="image/webp,image/jpeg,image/png">
                                     <div id="progress-wrp"><div class="progress-bar"></div ><div class="status">0%</div></div>
-                                    <div id="wn2">photo jpeg / jpg / png ... </div>
-                                    <div id="whiteMax2">Ajouter photo avec 200*260</div>
+                                    <div id="wn2">photo webp / jpeg / jpg / png ... </div>
+                                    <div id="whiteMax2">Ajouter photo avec 400*400</div>
                                     <div class="description" id="desc-1">
                                     <span class="invalid hint" id="checkPhoto"></span>
                                       <label id="choose-1" for="1"><i class="fa fa-camera" aria-hidden="true"></i></label>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 require_once('../func.php');
-$db = connect_pdo();
+$pdo = connect_pdo();
 try {
   $normalizeEditorText = function ($value) {
     $value = (string)$value;
@@ -56,11 +56,11 @@ try {
         $description4 = $_POST['desc5'].'##'.$_POST['descphoto5'].'##'.$_POST['photoNews5'].'##'.$_POST['smpost5'];
         $description5 = $_POST['desc6'].'##'.$_POST['descphoto6'].'##'.$_POST['photoNews6'].'##'.$_POST['smpost6'];
         $dr= explode('#',$_POST['selectCategory']);
-      $stmt = $db->prepare('INSERT INTO news(id,id_category,id_sousCategory,id_pseudo,auteur,titre,photo,description,description2,description3,description4,description5,urlVideo,SeoDescription,SeoKeywords,nVues,latestNews,mustajidaat,urgent,date) VALUES (NULL,:id_category,:id_sousCategory,:id_pseudo,:auteur,:titre,:photo,:description,:description2,:description3,:description4,:description5,"","","",:nVues,:latestNews,:mustajidaat,:urgent,:date_now)');
+      $stmt = $pdo->prepare('INSERT INTO news(id,id_category,id_sousCategory,id_pseudo,auteur,titre,photo,description,description2,description3,description4,description5,urlVideo,SeoDescription,SeoKeywords,nVues,latestNews,mustajidaat,urgent,date) VALUES (NULL,:id_category,:id_sousCategory,:id_pseudo,:auteur,:titre,:photo,:description,:description2,:description3,:description4,:description5,"","","",:nVues,:latestNews,:mustajidaat,:urgent,:date_now)');
         $stmt->execute([
           ':id_category' => (int)$dr[0],
           ':id_sousCategory' => (int)($dr[1] ?? 0),
-          ':id_pseudo' => (int)GetIdUser($db),
+          ':id_pseudo' => (int)GetIdUser($pdo),
           ':auteur' => trim($_POST['auteur']),
           ':titre' => trim($_POST['titleNews']),
           ':photo' => trim($_POST['photoNews']),
@@ -119,7 +119,7 @@ try {
         $description5 = $_POST['desc6'].'##'.$_POST['descphoto6'].'##'.$_POST['photoNews6'].'##'.$_POST['smpost6'];
       $dr= explode('#',$_POST['selectCategory']);
       
-      $stmt = $db->prepare('UPDATE news SET auteur=:auteur,id_category=:id_category,id_sousCategory=:id_sousCategory,titre=:titre,photo=:photo,description=:description,description2=:description2,description3=:description3,description4=:description4,description5=:description5,latestNews=:latestNews,mustajidaat=:mustajidaat,urgent=:urgent WHERE id=:id');
+      $stmt = $pdo->prepare('UPDATE news SET auteur=:auteur,id_category=:id_category,id_sousCategory=:id_sousCategory,titre=:titre,photo=:photo,description=:description,description2=:description2,description3=:description3,description4=:description4,description5=:description5,latestNews=:latestNews,mustajidaat=:mustajidaat,urgent=:urgent WHERE id=:id');
       $stmt->execute([
         ':auteur' => trim($_POST['auteur']),
         ':id_category' => (int)$dr[0],
@@ -141,7 +141,7 @@ try {
 }elseif($_POST['act']=='deleteNews'){
   $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
   if($id > 0){
-    $stmt = $db->prepare('DELETE FROM news WHERE id = :id');
+    $stmt = $pdo->prepare('DELETE FROM news WHERE id = :id');
     $stmt->execute([':id' => $id]);
   }
 }

@@ -1,6 +1,6 @@
 function readURL() {
   var oFile2 = document.getElementById("1").files[0];
-  var rFilter2 = /^(image\/jpeg|image\/jpg|image\/png)$/i;
+  var rFilter2 = /^(image\/webp|image\/jpeg|image\/jpg|image\/png)$/i;
   if (!rFilter2.test(oFile2.type)) {
     $("#desc-1").css("display", "flex");
     return;
@@ -75,29 +75,31 @@ $(".afficher .close").html(
   '<span><i class="fa fa-trash-o" aria-hidden="true"></i></span>'
 );
 
-CKEDITOR.replace("desc", {
-  language: "ar",
-  toolbarGroups: [
-    { name: "document", groups: ["mode", "document", "doctools"] },
-    { name: "basicstyles", groups: ["basicstyles", "cleanup"] },
-    {
-      name: "paragraph",
-      groups: ["list", "indent", "blocks", "align", "bidi", "paragraph"],
-    },
-    { name: "clipboard", groups: ["clipboard", "undo"] },
-    {
-      name: "editing",
-      groups: ["find", "selection", "spellchecker", "editing"],
-    },
-    { name: "forms", groups: ["forms"] },
-    { name: "links", groups: ["links"] },
-    { name: "insert", groups: ["insert"] },
-    { name: "styles", groups: ["styles"] },
-    { name: "colors", groups: ["colors"] },
-    { name: "tools", groups: ["tools"] },
-    { name: "others", groups: ["others"] },
-    { name: "about", groups: ["about"] },
-  ],
-  removeButtons:
-    "About,Source,Print,Preview,ExportPdf,NewPage,Save,Templates,PasteText,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,Blockquote,CreateDiv,BidiLtr,BidiRtl,Anchor,Image,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Maximize,ShowBlocks",
-});
+if (typeof CKEDITOR !== "undefined" && document.getElementById("desc")) {
+  CKEDITOR.replace("desc", {
+    language: "ar",
+    toolbarGroups: [
+      { name: "document", groups: ["mode", "document", "doctools"] },
+      { name: "basicstyles", groups: ["basicstyles", "cleanup"] },
+      {
+        name: "paragraph",
+        groups: ["list", "indent", "blocks", "align", "bidi", "paragraph"],
+      },
+      { name: "clipboard", groups: ["clipboard", "undo"] },
+      {
+        name: "editing",
+        groups: ["find", "selection", "spellchecker", "editing"],
+      },
+      { name: "forms", groups: ["forms"] },
+      { name: "links", groups: ["links"] },
+      { name: "insert", groups: ["insert"] },
+      { name: "styles", groups: ["styles"] },
+      { name: "colors", groups: ["colors"] },
+      { name: "tools", groups: ["tools"] },
+      { name: "others", groups: ["others"] },
+      { name: "about", groups: ["about"] },
+    ],
+    removeButtons:
+      "About,Source,Print,Preview,ExportPdf,NewPage,Save,Templates,PasteText,Find,Replace,SelectAll,Scayt,Form,Checkbox,Radio,TextField,Textarea,Select,Button,ImageButton,HiddenField,CopyFormatting,RemoveFormat,Blockquote,CreateDiv,BidiLtr,BidiRtl,Anchor,Image,Flash,Table,HorizontalRule,Smiley,SpecialChar,PageBreak,Iframe,Maximize,ShowBlocks",
+  });
+}

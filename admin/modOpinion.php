@@ -38,7 +38,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                                 <select class="form-control" name="selectNom" id="selectNom">
                                     <option value="">اسم الكاتب</option>
                                     <?php 
-                                        list($id,$nom,$photo) = GetAdminWriters($db);
+                                        list($id,$nom,$photo) = GetAdminWriters($pdo);
                                         for($z=0;$z<sizeof($id);$z++)
                                         {
                                           if($id[$z] == $nomW){

@@ -1,27 +1,28 @@
 <?php
 session_start();
 require_once('../func.php');
-$db = connect_pdo();
+$pdo = connect_pdo();
+$act = $_POST['act'] ?? '';
 
-if($_POST['act']=='addSousCat'){
-    if((trim($_POST['sousCategory'])=='')||(!validate_arab($_POST['sousCategory']))||($_POST['selectCategory'] == '')||(!validate_numeric((string)$_POST['selectCategory']))){
-        if(trim($_POST['sousCategory'])==''){ echo " ec "; }elseif(!validate_arab($_POST['sousCategory'])){ echo " vc "; }
+if($act=='addSousCat'){
+    if((trim($_POST['sousCategory'] ?? '')=='')||(!validate_arab($_POST['sousCategory'] ?? ''))||($_POST['selectCategory'] == '')||(!validate_numeric((string)$_POST['selectCategory']))){
+        if(trim($_POST['sousCategory'] ?? '')==''){ echo " ec "; }elseif(!validate_arab($_POST['sousCategory'] ?? '')){ echo " vc "; }
         if($_POST['selectCategory'] == ''){echo " cl ";}
     }else{
-         $stmt = $db->prepare('INSERT INTO sous_categories (id, id_category, name, SeoDescription, SeoKeywords) VALUES (NULL, :id_category, :name, "", "")');
+         $stmt = $pdo->prepare('INSERT INTO sous_categories (id, id_category, name, SeoDescription, SeoKeywords) VALUES (NULL, :id_category, :name, "", "")');
         $stmt->execute([':id_category' => (int)$_POST['selectCategory'], ':name' => trim($_POST['sousCategory'])]);
 		echo " addSouscat ";
     }
-}elseif($_POST['act']=='modSousCat'){
-     if((trim($_POST['sousCategory'])=='')||(!validate_arab($_POST['sousCategory']))||($_POST['selectCategory'] == '')||(!validate_numeric((string)$_POST['selectCategory']))){
-        if(trim($_POST['sousCategory'])==''){ echo " ec "; }elseif(!validate_arab($_POST['sousCategory'])){ echo " vc "; }
+}elseif($act=='modSousCat'){
+     if((trim($_POST['sousCategory'] ?? '')=='')||(!validate_arab($_POST['sousCategory'] ?? ''))||($_POST['selectCategory'] == '')||(!validate_numeric((string)$_POST['selectCategory']))){
+        if(trim($_POST['sousCategory'] ?? '')==''){ echo " ec "; }elseif(!validate_arab($_POST['sousCategory'] ?? '')){ echo " vc "; }
         if($_POST['selectCategory'] == ''){echo " cl ";}
     }else{
         if(!isset($_POST['id']) || !validate_numeric((string)$_POST['id'])){
             echo " id ";
             exit;
         }
-        $stmt = $db->prepare('UPDATE sous_categories SET id_category = :id_category, name = :name WHERE id = :id');
+        $stmt = $pdo->prepare('UPDATE sous_categories SET id_category = :id_category, name = :name WHERE id = :id');
         $stmt->execute([
             ':id_category' => (int)$_POST['selectCategory'],
             ':name' => trim($_POST['sousCategory']),

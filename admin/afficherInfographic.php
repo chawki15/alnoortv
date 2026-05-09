@@ -39,7 +39,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                         </tr>
                       </thead>
                       <tbody>
-                       <?php list($id,$photo,$titre) = GetAdminInfo($db); for($i=0;$i<sizeof($id);$i++){ ?>
+                       <?php list($id,$photo,$titre) = GetAdminInfo($pdo); for($i=0;$i<sizeof($id);$i++){ ?>
                         <tr>
                           <td><?php  echo $id[$i];?></td>
                           <td>

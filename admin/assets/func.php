@@ -2,8 +2,8 @@
 
 function connect_pdo()
 {
-	$s = 'localhost'; $l = 'root'; $p = ''; $db = 'nourtv';
-	$dsn = "mysql:host={$s};dbname={$db};charset=utf8mb4";
+	$s = 'localhost'; $l = 'root'; $p = ''; $pdo = 'nourtv';
+	$dsn = "mysql:host={$s};dbname={$pdo};charset=utf8mb4";
 	try {
 		return new PDO($dsn, $l, $p, [
 			PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -103,14 +103,14 @@ if (preg_match('/^https:\/\/(?:www\.)?(?:youtube.com|youtu.be)\/(?:watch\?(?=.*v
 endif;
 }
 
-function exist($db,$champ,$val,$tab)
+function exist($pdo,$champ,$val,$tab)
 {	
-	if($db instanceof PDO){
-		$stmt = $db->prepare('SELECT '.$champ.' FROM '.$tab.' WHERE '.$champ.' = :val LIMIT 1');
+	if($pdo instanceof PDO){
+		$stmt = $pdo->prepare('SELECT '.$champ.' FROM '.$tab.' WHERE '.$champ.' = :val LIMIT 1');
 		$stmt->execute([':val' => $val]);
 		$d = $stmt->fetch();
 	}else{
-		$d = mysqli_fetch_array(mysqli_query($db,'SELECT * FROM '.$tab.' WHERE '.$champ.' = "'.$val.'"'));
+		$d = mysqli_fetch_array(mysqli_query($pdo,'SELECT * FROM '.$tab.' WHERE '.$champ.' = "'.$val.'"'));
 	}
 	if(empty($d[$champ])): return false;
 		else: return true;
@@ -158,23 +158,23 @@ function Get_current_page()
 	return $currentpage;
 }
 
-function get_admin_by_id($db, $id)
+function get_admin_by_id($pdo, $id)
 {
-    $stmt = $db->prepare('SELECT id, name, email, password, active FROM admin WHERE id = :id LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, name, email, password, active FROM admin WHERE id = :id LIMIT 1');
     $stmt->execute([':id' => (int)$id]);
     $admin = $stmt->fetch();
     return $admin ?: null;
 }
 
-function get_admin_by_email($db, $email)
+function get_admin_by_email($pdo, $email)
 {
-    $stmt = $db->prepare('SELECT id, name, email, password, active FROM admin WHERE email = :email LIMIT 1');
+    $stmt = $pdo->prepare('SELECT id, name, email, password, active FROM admin WHERE email = :email LIMIT 1');
     $stmt->execute([':email' => $email]);
     $admin = $stmt->fetch();
     return $admin ?: null;
 }
 
-function verify_admin_password($db, $admin, $plainPassword)
+function verify_admin_password($pdo, $admin, $plainPassword)
 {
     if (!$admin || !isset($admin['password'])) {
         return false;
@@ -189,7 +189,7 @@ function verify_admin_password($db, $admin, $plainPassword)
         $ok = hash_equals($hash, md5($plainPassword));
         if ($ok) {
             $newHash = password_hash($plainPassword, PASSWORD_DEFAULT);
-            $stmt = $db->prepare('UPDATE admin SET password = :password WHERE id = :id');
+            $stmt = $pdo->prepare('UPDATE admin SET password = :password WHERE id = :id');
             $stmt->execute([':password' => $newHash, ':id' => (int)$admin['id']]);
         }
     }
@@ -197,9 +197,9 @@ function verify_admin_password($db, $admin, $plainPassword)
     return $ok;
 }
 
-function create_admin_user($db, $name, $email, $hash)
+function create_admin_user($pdo, $name, $email, $hash)
 {
-    $stmt = $db->prepare('INSERT INTO admin(id,name,email,password,active) VALUES (NULL,:name,:email,:password,0)');
+    $stmt = $pdo->prepare('INSERT INTO admin(id,name,email,password,active) VALUES (NULL,:name,:email,:password,0)');
     return $stmt->execute([
         ':name' => $name,
         ':email' => $email,
@@ -207,40 +207,42 @@ function create_admin_user($db, $name, $email, $hash)
     ]);
 }
 
-function GetIdUser($db)
+function GetIdUser($pdo)
 {
 	if(!isset($_SESSION['admin_id']) || !validate_numeric((string)$_SESSION['admin_id'])) return false;
-	$admin = get_admin_by_id($db, (int)$_SESSION['admin_id']);
+	$admin = get_admin_by_id($pdo, (int)$_SESSION['admin_id']);
 	if($admin && isset($admin['id'])) return (int)$admin['id'];
 	return false;
 }
 
-function loggedAdmin($db)
+function loggedAdmin($pdo)
 {
   if(isset($_SESSION['admin_id']) && validate_numeric((string)$_SESSION['admin_id'])){
-	$admin = get_admin_by_id($db, (int)$_SESSION['admin_id']);
+	$admin = get_admin_by_id($pdo, (int)$_SESSION['admin_id']);
 	if($admin && (int)$admin['active'] === 1) return true;
 	else return false;
   }
+  return false;
 }
 
-function logged($db)
+function logged($pdo)
 {
   if(isset($_SESSION['admin_id']) && validate_numeric((string)$_SESSION['admin_id'])){
-	$admin = get_admin_by_id($db, (int)$_SESSION['admin_id']);
+	$admin = get_admin_by_id($pdo, (int)$_SESSION['admin_id']);
 	if($admin && (int)$admin['active'] === 0) return true;
 	else return false;
   }
+  return false;
 }
 
-function GetTableByID($db,$table,$champ,$val)
+function GetTableByID($pdo,$table,$champ,$val)
 {
-	if($db instanceof PDO){
-		$stmt = $db->prepare('SELECT '.$champ.' FROM '.$table.' WHERE id = :id LIMIT 1');
+	if($pdo instanceof PDO){
+		$stmt = $pdo->prepare('SELECT '.$champ.' FROM '.$table.' WHERE id = :id LIMIT 1');
 		$stmt->execute([':id' => $val]);
 		$d = $stmt->fetch();
 	}else{
-		$q = mysqli_query($db,'SELECT '.$champ.' FROM '.$table.' WHERE id = "'.$val.'"');
+		$q = mysqli_query($pdo,'SELECT '.$champ.' FROM '.$table.' WHERE id = "'.$val.'"');
 		$d = mysqli_fetch_array($q);
 	}
 	return isset($d[$champ]) ? $d[$champ] : null;
@@ -379,9 +381,9 @@ function news_image_path($photo, $size = 1200)
 
 /*------------ SITE ------------*/
 
-function GetFunfNews($db,$i)
+function GetFunfNews($pdo,$i)
 {
-    $q = mysqli_query($db,'SELECT * FROM news where id_category = "'.$i.'" order by id desc limit 5');
+    $q = mysqli_query($pdo,'SELECT * FROM news where id_category = "'.$i.'" order by id desc limit 5');
 		while ($d = mysqli_fetch_array($q)) 
 		{
 			$id[] = $d['id'];
@@ -392,9 +394,9 @@ function GetFunfNews($db,$i)
 	return array($id,$titre,$photo,$date);	
 }
 
-function GetZweiNews($db,$i)
+function GetZweiNews($pdo,$i)
 {
-    $q = mysqli_query($db,'SELECT * FROM news where id_category = "'.$i.'" order by id desc limit 2');
+    $q = mysqli_query($pdo,'SELECT * FROM news where id_category = "'.$i.'" order by id desc limit 2');
 		while ($d = mysqli_fetch_array($q)) 
 		{
 			$id[] = $d['id'];
@@ -405,14 +407,14 @@ function GetZweiNews($db,$i)
 	return array($id,$titre,$photo,$date);	
 }
 
-function NbrAkhbar($db,$i)
+function NbrAkhbar($pdo,$i)
 {
-    $q = mysqli_fetch_array(mysqli_query($db,'SELECT count(*) as nbr FROM news where id_category = "'.$i.'"'));
+    $q = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM news where id_category = "'.$i.'"'));
 	return $q['nbr'];
 }
 
-function GetMustajidaat($db){
-	$q = mysqli_query($db,'SELECT * FROM news where mustajidaat = "2" order by id desc limit 9');
+function GetMustajidaat($pdo){
+	$q = mysqli_query($pdo,'SELECT * FROM news where mustajidaat = "2" order by id desc limit 9');
 	while ($d = mysqli_fetch_array($q)) 
 	{
 		$id[] = $d['id'];
@@ -421,8 +423,8 @@ function GetMustajidaat($db){
 	return array($id,$titre);				
 }
 
-function GetLatestNews($db){
-	$q = mysqli_query($db,'SELECT * FROM news where latestNews = "2" order by id desc limit 9');
+function GetLatestNews($pdo){
+	$q = mysqli_query($pdo,'SELECT * FROM news where latestNews = "2" order by id desc limit 9');
 	while ($d = mysqli_fetch_array($q)) 
 	{
 		$id[] = $d['id'];
@@ -433,8 +435,8 @@ function GetLatestNews($db){
 	return array($id,$titre,$photo,$date);				
 }
 
-function GetOpinion($db){
-	$l = mysqli_query($db,'SELECT * FROM opinion order by id desc limit 6');
+function GetOpinion($pdo){
+	$l = mysqli_query($pdo,'SELECT * FROM opinion order by id desc limit 6');
 		while ($l2 = mysqli_fetch_array($l)) 
 		{
 			$id[] = $l2['id'];
@@ -445,8 +447,8 @@ function GetOpinion($db){
 		return array($id,$idwriter,$titre);	
 }
 
-function GetInfo($db){
-	$y = mysqli_query($db,'SELECT * FROM caricature order by id desc limit 10');
+function GetInfo($pdo){
+	$y = mysqli_query($pdo,'SELECT * FROM caricature order by id desc limit 10');
 		while ($y2 = mysqli_fetch_array($y)) 
 		{
 			$id[] = $y2['id'];
@@ -457,8 +459,8 @@ function GetInfo($db){
 		return array($id,$photo,$titre);	
 }
 
-function  Urgent($db){
-	$q = mysqli_query($db,'SELECT * FROM news where urgent = "2" and date > DATE_SUB(NOW(), INTERVAL 10 MINUTE) order by date desc limit 5');
+function  Urgent($pdo){
+	$q = mysqli_query($pdo,'SELECT * FROM news where urgent = "2" and date > DATE_SUB(NOW(), INTERVAL 10 MINUTE) order by date desc limit 5');
 	while ($d = mysqli_fetch_array($q)) 
 	{
 		$id[] = $d['id'];
@@ -467,13 +469,13 @@ function  Urgent($db){
 	return array($id,$titre);	
 }
 
-function CountUrgent($db){
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT count(*) as nbr FROM news where urgent = "2" and date > DATE_SUB(NOW(), INTERVAL 10 MINUTE)'));
+function CountUrgent($pdo){
+	$d = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM news where urgent = "2" and date > DATE_SUB(NOW(), INTERVAL 10 MINUTE)'));
 	return $d['nbr'];
 }
 
-function MostWatchedDay($db){
-	$q = mysqli_query($db,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date LIKE "'.date("Y-m-d").'%" order by nVues desc  limit 9');
+function MostWatchedDay($pdo){
+	$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date LIKE "'.date("Y-m-d").'%" order by nVues desc  limit 9');
 	while ($d = mysqli_fetch_array($q)) 
 	{
 		$id[] = $d['id'];
@@ -484,8 +486,8 @@ function MostWatchedDay($db){
 	return array($id,$titre,$photo,$nVues);				
 }
 
-function  Last24hours($db){
-	$q = mysqli_query($db,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date > DATE_SUB(NOW(), INTERVAL 24 HOUR) order by nVues desc  limit 10');
+function  Last24hours($pdo){
+	$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date > DATE_SUB(NOW(), INTERVAL 24 HOUR) order by nVues desc  limit 10');
 	while ($d = mysqli_fetch_array($q)) 
 	{
 		$id[] = $d['id'];
@@ -497,9 +499,9 @@ function  Last24hours($db){
 	return array($id,$titre,$photo,$nVues,$date);	
 }
 
-function MostWatchedWeek($db){
+function MostWatchedWeek($pdo){
 	$startDate = time();
-	$q = mysqli_query($db,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date between  "'.date('Y-m-d', strtotime('-7 day', $startDate)).'" and "'.date("Y-m-d").'"   order by nVues desc  limit 10');
+	$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") and date between  "'.date('Y-m-d', strtotime('-7 day', $startDate)).'" and "'.date("Y-m-d").'"   order by nVues desc  limit 10');
 	while ($d = mysqli_fetch_array($q)) 
 	{
 		$id[] = $d['id'];
@@ -510,8 +512,8 @@ function MostWatchedWeek($db){
 	return array($id,$titre,$photo,$nVues);				
 }
 
-function MostWatched($db){
-	$q = mysqli_query($db,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") order by nVues desc  limit 9');
+function MostWatched($pdo){
+	$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") order by nVues desc  limit 9');
 	while ($d = mysqli_fetch_array($q)) 
 	{
 		$id[] = $d['id'];
@@ -522,9 +524,9 @@ function MostWatched($db){
 	return array($id,$titre,$photo,$nVues);				
 }
 
-function GetVideo($db)
+function GetVideo($pdo)
 {
-    $q = mysqli_query($db,'SELECT * FROM news where id_category = "11" order by id desc limit 5');
+    $q = mysqli_query($pdo,'SELECT * FROM news where id_category = "11" order by id desc limit 5');
 		while ($d = mysqli_fetch_array($q)) 
 		{
 			$id[] = $d['id'];
@@ -535,17 +537,17 @@ function GetVideo($db)
 	return array($id,$titre,$photo,$url);	
 }
 
-function GetTotalVideo($db)
+function GetTotalVideo($pdo)
 {	
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT count(*) as nbr FROM news where id_category = "11"'));
+	$d = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM news where id_category = "11"'));
 	return $d['nbr'];
 }
 
-function GetSousMenuByMenu($db,$ids)
+function GetSousMenuByMenu($pdo,$ids)
 {
 	$idss = []; $idcats = []; $nom = [];
-	if($db instanceof PDO){
-		$stmt = $db->prepare('SELECT * FROM sous_categories WHERE id_category = :id_category');
+	if($pdo instanceof PDO){
+		$stmt = $pdo->prepare('SELECT * FROM sous_categories WHERE id_category = :id_category');
 		$stmt->execute([':id_category' => (int)$ids]);
 		while ($m = $stmt->fetch()) {
 			$idss[] = $m['id'];
@@ -553,7 +555,7 @@ function GetSousMenuByMenu($db,$ids)
 			$nom[] = $m['name'];
 		}
 	}else{
-		$q1 = mysqli_query($db,'SELECT * FROM sous_categories where id_category ="'.$ids.'"');
+		$q1 = mysqli_query($pdo,'SELECT * FROM sous_categories where id_category ="'.$ids.'"');
 		while ($m = mysqli_fetch_array($q1)) {
 			$idss[] = $m['id'];
 			$idcats[] = $m['id_category'];
@@ -563,43 +565,50 @@ function GetSousMenuByMenu($db,$ids)
 	return array($idss,$idcats,$nom);
 }
 
-function CountSousMenuByMenu($db,$ids)
+function CountSousMenuByMenu($pdo,$ids)
 {
-	if($db instanceof PDO){
-		$stmt = $db->prepare('SELECT count(*) as nbr FROM sous_categories WHERE id_category = :id_category');
+	if($pdo instanceof PDO){
+		$stmt = $pdo->prepare('SELECT count(*) as nbr FROM sous_categories WHERE id_category = :id_category');
 		$stmt->execute([':id_category' => (int)$ids]);
 		$d = $stmt->fetch();
 	}else{
-		$d = mysqli_fetch_array(mysqli_query($db,'SELECT count(*) as nbr FROM sous_categories where id_category ="'.$ids.'"'));
+		$d = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM sous_categories where id_category ="'.$ids.'"'));
 	}
 	return (int)($d['nbr'] ?? 0);
 }
 
-function GetAdminMenu($db)
+function GetAdminMenu($pdo)
 {
-    $q = mysqli_query($db,'SELECT * FROM categories');
-		while ($d = mysqli_fetch_array($q)) 
-		{
-			$id[] = $d['id'];
-			$name[] = $d['name'];
-		}
-		
-		return array($id,$name);	
+     $id = []; $name = [];
+    if($pdo instanceof PDO){
+        $q = $pdo->query('SELECT * FROM categories');
+        while ($d = $q->fetch()) {
+            $id[] = $d['id'];
+            $name[] = $d['name'];
+        }
+    }else{
+        $q = mysqli_query($pdo,'SELECT * FROM categories');
+        while ($d = mysqli_fetch_array($q)) {
+            $id[] = $d['id'];
+            $name[] = $d['name'];
+        }
+    }
+    return array($id,$name);	
 }
 
 /*------------ ADMIN ------------*/
 
-function GetAdminCategories($db)
+function GetAdminCategories($pdo)
 {
     $id = []; $name = [];
-    if($db instanceof PDO){
-		$q = $db->query('SELECT * FROM categories');
+    if($pdo instanceof PDO){
+		$q = $pdo->query('SELECT * FROM categories');
 		while ($d = $q->fetch()) {
 			$id[] = $d['id'];
 			$name[] = $d['name'];
 			}
 		}else{
-		$q = mysqli_query($db,'SELECT * FROM categories');
+		$q = mysqli_query($pdo,'SELECT * FROM categories');
 		while ($d = mysqli_fetch_array($q)) {
 			$id[] = $d['id'];
 			$name[] = $d['name'];
@@ -608,18 +617,18 @@ function GetAdminCategories($db)
 	return array($id,$name);	
 }
 
-function GetAdminSousMenu($db)
+function GetAdminSousMenu($pdo)
 {
 	$id = []; $idcat = []; $name = [];
-	if($db instanceof PDO){
-		$q = $db->query('SELECT * FROM sous_categories');
+	if($pdo instanceof PDO){
+		$q = $pdo->query('SELECT * FROM sous_categories');
 		while ($d = $q->fetch()) {
 			$id[] = $d['id'];
 			$idcat[] = $d['id_category'];
 			$name[] = $d['name'];
 		}
 	}else{
-		$q = mysqli_query($db,'SELECT * FROM sous_categories');
+		$q = mysqli_query($pdo,'SELECT * FROM sous_categories');
 		while ($d = mysqli_fetch_array($q)) {
 			$id[] = $d['id'];
 			$idcat[] = $d['id_category'];
@@ -629,14 +638,14 @@ function GetAdminSousMenu($db)
 	return array($id,$idcat,$name);
 }
 
-function GetAdminNews($db,$a)
+function GetAdminNews($pdo,$a)
 {
 	$id = []; $user = []; $category = []; $titre = []; $photo = [];
-	if($db instanceof PDO){
+	if($pdo instanceof PDO){
 		if($a =='1'){
-			$q = $db->query('SELECT * FROM news WHERE id_category NOT IN (11,15) ORDER BY id DESC');
+			$q = $pdo->query('SELECT * FROM news WHERE id_category NOT IN (11,15) ORDER BY id DESC');
 		}else{
-			$stmt = $db->prepare('SELECT * FROM news WHERE id_pseudo = :id_pseudo AND id_category NOT IN (11,15) ORDER BY id DESC');
+			$stmt = $pdo->prepare('SELECT * FROM news WHERE id_pseudo = :id_pseudo AND id_category NOT IN (11,15) ORDER BY id DESC');
 			$stmt->execute([':id_pseudo' => (int)$a]);
 			$q = $stmt;
 		}
@@ -649,9 +658,9 @@ function GetAdminNews($db,$a)
 		}
 	}else{
 		if($a =='1'){
-			$q = mysqli_query($db,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") order by id desc');
+			$q = mysqli_query($pdo,'SELECT * FROM news where id_category not in (select id from categories where id = "11" or id = "15") order by id desc');
 		}else{
-			$q = mysqli_query($db,'SELECT * FROM news where id_pseudo="'.$a.'" and id_category not in (select id from categories where id = "11" or id = "15") order by id desc');
+			$q = mysqli_query($pdo,'SELECT * FROM news where id_pseudo="'.$a.'" and id_category not in (select id from categories where id = "11" or id = "15") order by id desc');
 		}
 		while ($d = mysqli_fetch_array($q)) {
 			$id[] = $d['id'];
@@ -664,85 +673,135 @@ function GetAdminNews($db,$a)
 	return array($id,$user,$category,$titre,$photo);	
 }
 
-function GetAdminWriters($db)
+function GetAdminWriters($pdo)
 {
-    $z = mysqli_query($db,'SELECT * FROM writers');
-		while ($n = mysqli_fetch_array($z)) 
-		{
-			$id[] = $n['id'];
-			$nom[] = $n['nom'];
-			$photo[] = $n['photo'];
-		}
-		
-		return array($id,$nom,$photo);	
+    $id = []; $nom = []; $photo = [];
+    if($pdo instanceof PDO){
+        $z = $pdo->query('SELECT * FROM writers');
+        while ($n = $z->fetch()) {
+            $id[] = $n['id'];
+            $nom[] = $n['nom'];
+            $photo[] = $n['photo'];
+        }
+    }else{
+        $z = mysqli_query($pdo,'SELECT * FROM writers');
+        while ($n = mysqli_fetch_array($z)) {
+            $id[] = $n['id'];
+            $nom[] = $n['nom'];
+            $photo[] = $n['photo'];
+        }
+    }
+    return array($id,$nom,$photo);
 }
 
-function GetAdminOpinion($db){
-	$l = mysqli_query($db,'SELECT * FROM opinion order by id desc');
-		while ($l2 = mysqli_fetch_array($l)) 
-		{
-			$id[] = $l2['id'];
-			$idwriter[] =$l2['id_writer'];
-			$titre[] = $l2['titre'];
-		}
-		
-		return array($id,$idwriter,$titre);	
+function GetAdminOpinion($pdo){
+	$id = []; $idwriter = []; $titre = [];
+    if($pdo instanceof PDO){
+        $l = $pdo->query('SELECT * FROM opinion ORDER BY id DESC');
+        while ($l2 = $l->fetch()) {
+            $id[] = $l2['id'];
+            $idwriter[] = $l2['id_writer'];
+            $titre[] = $l2['titre'];
+        }
+    }else{
+        $l = mysqli_query($pdo,'SELECT * FROM opinion order by id desc');
+        while ($l2 = mysqli_fetch_array($l)) {
+            $id[] = $l2['id'];
+            $idwriter[] =$l2['id_writer'];
+            $titre[] = $l2['titre'];
+        }
+    }
+    return array($id,$idwriter,$titre);
 }
 
-function GetAdminVideo($db,$a)
+function GetAdminVideo($pdo,$a)
 {
-	if($a == '1'){
-		$q = mysqli_query($db,'SELECT * FROM news where id_category in (select id from categories where id = "11") order by id desc');  
-	}else{
-		$q = mysqli_query($db,'SELECT * FROM news where id_pseudo="'.$a.'" and id_category in (select id from categories where id = "11") order by id desc');
-	}
-    
-		while ($d = mysqli_fetch_array($q)) 
-		{
-			$id[] = $d['id'];
-			$user[] = $d['id_pseudo'];
-			$category[] = $d['id_category'];
-			$titre[] = $d['titre'];
-			$photo[] = news_image_name($d['photo'], 1200);
-		}
-	return array($id,$user,$category,$titre,$photo);	
+	$id = []; $user = []; $category = []; $titre = []; $photo = [];
+    if($pdo instanceof PDO){
+        if($a == '1'){
+            $q = $pdo->query('SELECT * FROM news WHERE id_category = 11 ORDER BY id DESC');
+        }else{
+            $stmt = $pdo->prepare('SELECT * FROM news WHERE id_pseudo = :id_pseudo AND id_category = 11 ORDER BY id DESC');
+            $stmt->execute([':id_pseudo' => (int)$a]);
+            $q = $stmt;
+        }
+        while ($d = $q->fetch()) {
+            $id[] = $d['id'];
+            $user[] = $d['id_pseudo'];
+            $category[] = $d['id_category'];
+            $titre[] = $d['titre'];
+            $photo[] = news_image_name($d['photo'], 1200);
+        }
+    }else{
+        if($a == '1'){
+            $q = mysqli_query($pdo,'SELECT * FROM news where id_category in (select id from categories where id = "11") order by id desc');  
+        }else{
+            $q = mysqli_query($pdo,'SELECT * FROM news where id_pseudo="'.$a.'" and id_category in (select id from categories where id = "11") order by id desc');
+        }
+        while ($d = mysqli_fetch_array($q)) {
+            $id[] = $d['id'];
+            $user[] = $d['id_pseudo'];
+            $category[] = $d['id_category'];
+            $titre[] = $d['titre'];
+            $photo[] = news_image_name($d['photo'], 1200);
+        }
+    }
+    return array($id,$user,$category,$titre,$photo);
 }
 
-function GetAdminInfo($db){
-	$y = mysqli_query($db,'SELECT * FROM caricature order by id desc');
-		while ($y2 = mysqli_fetch_array($y)) 
-		{
-			$id[] = $y2['id'];
-			$photo[] = $y2['photo'];
-			$titre[] = $y2['titre'];
-		}
-		
-		return array($id,$photo,$titre);	
+function GetAdminInfo($pdo){
+	$id = []; $photo = []; $titre = [];
+    if($pdo instanceof PDO){
+        $y = $pdo->query('SELECT * FROM caricature ORDER BY id DESC');
+        while ($y2 = $y->fetch()) {
+            $id[] = $y2['id'];
+            $photo[] = $y2['photo'];
+            $titre[] = $y2['titre'];
+        }
+    }else{
+        $y = mysqli_query($pdo,'SELECT * FROM caricature order by id desc');
+        while ($y2 = mysqli_fetch_array($y)) {
+            $id[] = $y2['id'];
+            $photo[] = $y2['photo'];
+            $titre[] = $y2['titre'];
+        }
+    }
+    return array($id,$photo,$titre);
 }
 
-function CountNews($db,$ids)
+function CountNews($pdo,$ids)
 {
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT count(*) as nbr FROM news where id_category ="'.$ids.'"'));
-	return $d['nbr'];
+	if($pdo instanceof PDO){
+        $stmt = $pdo->prepare('SELECT count(*) as nbr FROM news WHERE id_category = :id_category');
+        $stmt->execute([':id_category' => (int)$ids]);
+        $d = $stmt->fetch();
+    }else{
+        $d = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM news where id_category ="'.$ids.'"'));
+    }
+    return (int)($d['nbr'] ?? 0);
 }
 
-function CountVideos($db)
+function CountVideos($pdo)
 {
-	$d = mysqli_fetch_array(mysqli_query($db,'SELECT count(*) as nbr FROM news where id_category = "10" and id_sousCategory="1"'));
-	return $d['nbr'];
+	if($pdo instanceof PDO){
+        $d = $pdo->query('SELECT count(*) as nbr FROM news WHERE id_category = 10 AND id_sousCategory = 1')->fetch();
+    }else{
+        $d = mysqli_fetch_array(mysqli_query($pdo,'SELECT count(*) as nbr FROM news where id_category = "10" and id_sousCategory="1"'));
+    }
+    return (int)($d['nbr'] ?? 0);
 }
 
-function GetAdminMenuNews($db)
+function GetAdminMenuNews($pdo)
 {
     $id = []; $name = [];
-    if($db instanceof PDO){
-		$q = $db->query('SELECT * FROM categories WHERE id NOT IN (11,15)');
+    if($pdo instanceof PDO){
+		$q = $pdo->query('SELECT * FROM categories WHERE id NOT IN (11,15)');
 		while ($d = $q->fetch()) {
 			$id[] = $d['id'];
 			$name[] = $d['name'];
 		}
 		}else{
-		$q = mysqli_query($db,'SELECT * FROM categories where id not in (select id from categories where id = "11" or id = "15") ');
+		$q = mysqli_query($pdo,'SELECT * FROM categories where id not in (select id from categories where id = "11" or id = "15") ');
 		while ($d = mysqli_fetch_array($q)) {
 			$id[] = $d['id'];
 			$name[] = $d['name'];
@@ -751,16 +810,23 @@ function GetAdminMenuNews($db)
 	return array($id,$name);	
 }
 
-function GetAdminVedions($db)
+function GetAdminVedions($pdo)
 {
-    $q = mysqli_query($db,'SELECT * FROM categories where id in (select id from categories where id = "11") ');
-		while ($d = mysqli_fetch_array($q)) 
-		{
-			$id[] = $d['id'];
-			$name[] = $d['name'];
-		}
-		
-		return array($id,$name);	
+    $id = []; $name = [];
+    if($pdo instanceof PDO){
+        $q = $pdo->query('SELECT * FROM categories WHERE id = 11');
+        while ($d = $q->fetch()) {
+            $id[] = $d['id'];
+            $name[] = $d['name'];
+        }
+    }else{
+        $q = mysqli_query($pdo,'SELECT * FROM categories where id in (select id from categories where id = "11") ');
+        while ($d = mysqli_fetch_array($q)) {
+            $id[] = $d['id'];
+            $name[] = $d['name'];
+        }
+    }
+    return array($id,$name);	
 }
 
 /* FUNCTION <JDAD> */
@@ -807,7 +873,7 @@ function incrementViews(PDO $pdo, int $id): void {
     $st->execute([':id' => $id]);
 }
 
-function migrate_news_images_to_webp_sizes($db, $limit = 0)
+function migrate_news_images_to_webp_sizes($pdo, $limit = 0)
 {
     $newsDir = __DIR__ . '/../../assets/img/news/';
     if (!is_dir($newsDir)) {
@@ -819,7 +885,7 @@ function migrate_news_images_to_webp_sizes($db, $limit = 0)
     $errors = [];
     $sizes = [300, 600, 1200];
 
-    if (!($db instanceof PDO)) {
+    if (!($pdo instanceof PDO)) {
         return ['updated' => 0, 'skipped' => 0, 'errors' => ['pdo_required']];
     }
 
@@ -827,9 +893,9 @@ function migrate_news_images_to_webp_sizes($db, $limit = 0)
     if ((int)$limit > 0) {
         $sql .= ' LIMIT ' . (int)$limit;
     }
-    $rows = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
 
-    $updateStmt = $db->prepare('UPDATE news SET photo = :photo WHERE id = :id');
+    $updateStmt = $pdo->prepare('UPDATE news SET photo = :photo WHERE id = :id');
 
     foreach ($rows as $row) {
         $id = (int)($row['id'] ?? 0);
@@ -936,9 +1002,9 @@ function migrate_news_images_to_webp_sizes($db, $limit = 0)
     return ['updated' => $updated, 'skipped' => $skipped, 'errors' => $errors];
 }
 
-function count_missing_news_images($db)
+function count_missing_news_images($pdo)
 {
-    if (!($db instanceof PDO)) {
+    if (!($pdo instanceof PDO)) {
         return 0;
     }
 
@@ -947,7 +1013,7 @@ function count_missing_news_images($db)
         return 0;
     }
 
-    $rows = $db->query('SELECT photo FROM news WHERE photo IS NOT NULL AND photo <> ""')->fetchAll(PDO::FETCH_ASSOC);
+    $rows = $pdo->query('SELECT photo FROM news WHERE photo IS NOT NULL AND photo <> ""')->fetchAll(PDO::FETCH_ASSOC);
     $missing = 0;
 
     foreach ($rows as $row) {
@@ -968,9 +1034,9 @@ function count_missing_news_images($db)
     return $missing;
 }
 
-function update_news_photo_db_type_to_webp($db, $limit = 0)
+function update_news_photo_db_type_to_webp($pdo, $limit = 0)
 {
-    if (!($db instanceof PDO)) {
+    if (!($pdo instanceof PDO)) {
         return ['updated' => 0, 'skipped' => 0, 'errors' => ['pdo_required']];
     }
 
@@ -984,8 +1050,8 @@ function update_news_photo_db_type_to_webp($db, $limit = 0)
         $sql .= ' LIMIT ' . (int)$limit;
     }
 
-    $rows = $db->query($sql)->fetchAll(PDO::FETCH_ASSOC);
-    $updateStmt = $db->prepare('UPDATE news SET photo = :photo WHERE id = :id');
+    $rows = $pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    $updateStmt = $pdo->prepare('UPDATE news SET photo = :photo WHERE id = :id');
     $updated = 0;
     $skipped = 0;
     $errors = [];

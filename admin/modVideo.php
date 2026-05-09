@@ -80,13 +80,13 @@
 
                                   <?php 
 
-                                        list($id,$name) = GetAdminVedions($db);
+                                        list($id,$name) = GetAdminVedions($pdo);
 
                                         for($i=0;$i<sizeof($id);$i++)
 
                                         {
 
-                                          $f = CountSousMenuByMenu($db,$id[$i]);
+                                          $f = CountSousMenuByMenu($pdo,$id[$i]);
 
 
 
@@ -108,7 +108,7 @@
 
                                           }else{
 
-                                          list($idss,$idcats,$nom)  = GetSousMenuByMenu($db,$id[$i]);
+                                          list($idss,$idcats,$nom)  = GetSousMenuByMenu($pdo,$id[$i]);
 
                                           for($j=0;$j<sizeof($idss);$j++)
 

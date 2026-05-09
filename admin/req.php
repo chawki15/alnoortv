@@ -1,7 +1,22 @@
 <?php
   session_start();
   require_once('assets/func.php');
-  $db = connect_pdo();
+  $pdo = connect_pdo();
+  $currentPage = curPageName();
+
+function admin_get_int_param($key)
+{
+  if(!isset($_GET[$key]) || !validate_numeric((string)$_GET[$key])){
+    return null;
+  }
+  return (int)$_GET[$key];
+}
+
+function admin_split_description($value)
+{
+  $parts = explode('##', (string)$value);
+  return array_pad($parts, 4, '');
+}
 
 if(Get_current_page() != 'login.php'){
     if(!isset($_SESSION['admin_id']))
@@ -16,85 +31,88 @@ if(Get_current_page() != 'login.php'){
 }
 
 if(isset($_SESSION['admin_id'])){
-  $d1 = get_admin_by_id($db, (int)$_SESSION['admin_id']);
+  $d1 = get_admin_by_id($pdo, (int)$_SESSION['admin_id']);
 } 
 
-if(curPageName()=='modCat.php'){
-  $name = GetTableByID($db,'categories','name',$_GET['u']);
+$uId = admin_get_int_param('u');
+$sId = admin_get_int_param('s');
+
+if($currentPage=='modCat.php' && $uId !== null){
+  $name = GetTableByID($pdo,'categories','name',$uId);
 }
 
-if(curPageName()=='modSouscat.php'){
-  $cat = GetTableByID($db,'sous_categories','id_category',$_GET['u']);
-  $nom = GetTableByID($db,'sous_categories','name',$_GET['u']);
+if($currentPage=='modSouscat.php' && $uId !== null){
+  $cat = GetTableByID($pdo,'sous_categories','id_category',$uId);
+  $nom = GetTableByID($pdo,'sous_categories','name',$uId);
 }
 
-if(curPageName()=='modNews.php'){
-  $titre = GetTableByID($db,'news','titre',$_GET['u']);
-    $cat = GetTableByID($db,'news','id_category',$_GET['u']);
-    $souscat = GetTableByID($db,'news','id_sousCategory',$_GET['u']);
-    $latestNews	 = GetTableByID($db,'news','latestNews',$_GET['u']);
-    $urgent = GetTableByID($db,'news','urgent',$_GET['u']);
-    $mustajidaat = GetTableByID($db,'news','mustajidaat',$_GET['u']);
-    $photo = GetTableByID($db,'news','photo',$_GET['u']);
-    $auteur =  GetTableByID($db,'news','auteur',$_GET['u']);
-    $descrition = explode('##',GetTableByID($db,'news','description',$_GET['u']));
+if($currentPage=='modNews.php' && $uId !== null){
+  $titre = GetTableByID($pdo,'news','titre',$uId);
+    $cat = GetTableByID($pdo,'news','id_category',$uId);
+    $souscat = GetTableByID($pdo,'news','id_sousCategory',$uId);
+    $latestNews	 = GetTableByID($pdo,'news','latestNews',$uId);
+    $urgent = GetTableByID($pdo,'news','urgent',$uId);
+    $mustajidaat = GetTableByID($pdo,'news','mustajidaat',$uId);
+    $photo = GetTableByID($pdo,'news','photo',$uId);
+    $auteur =  GetTableByID($pdo,'news','auteur',$uId);
+    $descrition = explode('##',GetTableByID($pdo,'news','description',$uId));
     $des1 = $descrition[0]; $photo1 = $descrition[2]; $titrephoto1 = $descrition[1]; $social1 = $descrition[3];
-    $descrition2 = explode('##',GetTableByID($db,'news','description2',$_GET['u']));
+    $descrition2 = explode('##',GetTableByID($pdo,'news','description2',$uId));
     $des2 = $descrition2[0]; $photo2 = $descrition2[2]; $titrephoto2 = $descrition2[1]; $social2 = $descrition2[3];
-    $descrition3 = explode('##',GetTableByID($db,'news','description3',$_GET['u']));
+    $descrition3 = explode('##',GetTableByID($pdo,'news','description3',$uId));
     $des3 = $descrition3[0]; $photo3 = $descrition3[2]; $titrephoto3 = $descrition3[1]; $social3 = $descrition3[3];
-    $descrition4 = explode('##',GetTableByID($db,'news','description4',$_GET['u']));
+    $descrition4 = explode('##',GetTableByID($pdo,'news','description4',$uId));
     $des4 = $descrition4[0]; $photo4 = $descrition4[2]; $titrephoto4 = $descrition4[1]; $social4 = $descrition4[3];
-    $descrition5 = explode('##',GetTableByID($db,'news','description5',$_GET['u']));
+    $descrition5 = explode('##',GetTableByID($pdo,'news','description5',$uId));
     $des5 = $descrition5[0]; $photo5 = $descrition5[2]; $titrephoto5 = $descrition5[1]; $social5 = $descrition5[3];
 }
 
-if(curPageName()=='modVideo.php'){
-  $titre = GetTableByID($db,'news','titre',$_GET['u']);
-  $cat = GetTableByID($db,'news','id_category',$_GET['u']);
-  $souscat = GetTableByID($db,'news','id_sousCategory',$_GET['u']);
-  $photo = GetTableByID($db,'news','photo',$_GET['u']);
-  $descrition = explode('##',GetTableByID($db,'news','description',$_GET['u']));
+if($currentPage=='modVideo.php'){
+  $titre = GetTableByID($pdo,'news','titre',$uId);
+  $cat = GetTableByID($pdo,'news','id_category',$uId);
+  $souscat = GetTableByID($pdo,'news','id_sousCategory',$uId);
+  $photo = GetTableByID($pdo,'news','photo',$uId);
+  $descrition = explode('##',GetTableByID($pdo,'news','description',$uId));
   $des = $descrition[0];
-  $url =  GetTableByID($db,'news','urlVideo',$_GET['u']);
+  $url =  GetTableByID($pdo,'news','urlVideo',$uId);
 }
 
-if(curPageName()=='modWriter.php'){
-  $nom = GetTableByID($db,'writers','nom',$_GET['u']);
-  $photo = GetTableByID($db,'writers','photo',$_GET['u']);
+if($currentPage=='modWriter.php'){
+  $nom = GetTableByID($pdo,'writers','nom',$uId);
+  $photo = GetTableByID($pdo,'writers','photo',$uId);
 }
 
-if(curPageName()=='modOpinion.php'){
-  $nomW = GetTableByID($db,'opinion','id_writer',$_GET['u']);
-  $titre = GetTableByID($db,'opinion','titre',$_GET['u']);
-  $description = GetTableByID($db,'opinion','description',$_GET['u']);
+if($currentPage=='modOpinion.php'){
+  $nomW = GetTableByID($pdo,'opinion','id_writer',$uId);
+  $titre = GetTableByID($pdo,'opinion','titre',$uId);
+  $description = GetTableByID($pdo,'opinion','description',$uId);
 }
 
-if(curPageName()=='modInInfo.php'){
-  $titre = GetTableByID($db,'caricature','titre',$_GET['u']);
-  $photo = '../assets/img/infographics/'.GetTableByID($db,'caricature','photo',$_GET['u']);
+if($currentPage=='modInInfo.php'){
+  $titre = GetTableByID($pdo,'caricature','titre',$uId);
+  $photo = '../assets/img/infographics/'.GetTableByID($pdo,'caricature','photo',$uId);
 }
 
-//  if(loggedAdmin($db)){header("Location:index.php");}
+//  if(loggedAdmin($pdo)){header("Location:index.php");}
 if(curPageName()=='seo.php'){
   if($_GET['v'] =='cat'){
-    $titre = GetTableByID($db,'categories','name',$_GET['s']);
-    $keyWordSeo = GetTableByID($db,'categories','SeoKeywords',$_GET['s']);
-    $descSeo = GetTableByID($db,'categories','SeoDescription',$_GET['s']);
+    $titre = GetTableByID($pdo,'categories','name',$_GET['s']);
+    $keyWordSeo = GetTableByID($pdo,'categories','SeoKeywords',$_GET['s']);
+    $descSeo = GetTableByID($pdo,'categories','SeoDescription',$_GET['s']);
     $cat ='seoCat';
   }
 
   if($_GET['v'] =='souscat'){
-    $titre = GetTableByID($db,'sous_categories','name',$_GET['s']);
-    $keyWordSeo = GetTableByID($db,'sous_categories','SeoKeywords',$_GET['s']);
-    $descSeo = GetTableByID($db,'sous_categories','SeoDescription',$_GET['s']);
+    $titre = GetTableByID($pdo,'sous_categories','name',$_GET['s']);
+    $keyWordSeo = GetTableByID($pdo,'sous_categories','SeoKeywords',$_GET['s']);
+    $descSeo = GetTableByID($pdo,'sous_categories','SeoDescription',$_GET['s']);
     $cat ='seoSousCat';
   }
 
   if($_GET['v'] =='news'){
-    $titre = GetTableByID($db,'news','titre',$_GET['s']);
-    $keyWordSeo = GetTableByID($db,'news','SeoKeywords',$_GET['s']);
-    $descSeo = GetTableByID($db,'news','SeoDescription',$_GET['s']);
+    $titre = GetTableByID($pdo,'news','titre',$_GET['s']);
+    $keyWordSeo = GetTableByID($pdo,'news','SeoKeywords',$_GET['s']);
+    $descSeo = GetTableByID($pdo,'news','SeoDescription',$_GET['s']);
     $cat ='seoNews';
   }
 
