@@ -40,7 +40,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                               </div>
                             </div>
                             <div class="form-group row">
-                            <label class="col-md-2 label-control" for="eventRegInput2">صورة <span data-toggle="tooltip" data-placement="top" data-original-title="المرجو عند ادخال الصورة لاتقل 1240*697" class="alert-icon"><i class="la la-info-circle"></i></span></label>
+                             <label class="col-md-2 label-control" for="eventRegInput2">صورة <span data-toggle="tooltip" data-placement="top" data-original-title="سيتم إنشاء الصورة الرئيسية بحجم 1200*675" class="alert-icon"><i class="la la-info-circle"></i></span></label>
                               <div class="col-md-10">
                                 <div class="list">
                                   <div class="group-image image-1">
@@ -48,7 +48,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                                     <div id="progress-wrp"><div class="progress-bar"></div ><div class="status">0%</div></div>
                                     <div id="wn1">photo jpeg / jpg / png ... </div>
                                     <div id="taille1">File size > 4.5 MB </div>
-                                    <div id="whiteMax1">Ajouter photo avec 200*260</div>
+                                     <div id="whiteMax1">Ajouter photo avec 1200*675</div>
                                     <div class="description" id="desc-1">
                                     <span class="invalid hint" id="checkPhotoInfographic"></span>
                                       <label id="choose-1" for="1"><i class="fa fa-camera" aria-hidden="true"></i></label>

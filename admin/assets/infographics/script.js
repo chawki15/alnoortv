@@ -1,4 +1,14 @@
 function readURL() {
+  var infographicTitle = $.trim($("#titleInfographic").val());
+  if (infographicTitle === "") {
+    $("#titleInfographic").css({ border: "2px solid #DA2128" });
+    $("#checkTitleInfographic").html("من فضلك ادخل العنوان قبل رفع الصورة");
+    $("#checkTitleInfographic").css({ color: "#FF4961" });
+    $("#checkTitleInfographic").fadeIn("slow");
+    $("#1").val("");
+    return;
+  }
+
   var oFile2 = document.getElementById("1").files[0];
   var rFilter2 = /^(image\/jpeg|image\/jpg|image\/png)$/i;
   var FileSize = oFile2.size / 1024 / 1024;
