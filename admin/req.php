@@ -1,5 +1,7 @@
 <?php
   session_start();
+  header('Content-Type: text/html; charset=utf-8');
+
   require_once('assets/func.php');
   $pdo = connect_pdo();
   $currentPage = curPageName();
@@ -67,12 +69,12 @@ if($currentPage=='modNews.php' && $uId !== null){
     $des5 = $descrition5[0]; $photo5 = $descrition5[2]; $titrephoto5 = $descrition5[1]; $social5 = $descrition5[3];
 }
 
-if($currentPage=='modVideo.php'){
+if($currentPage=='modVideo.php' && $uId !== null){
   $titre = GetTableByID($pdo,'news','titre',$uId);
   $cat = GetTableByID($pdo,'news','id_category',$uId);
   $souscat = GetTableByID($pdo,'news','id_sousCategory',$uId);
   $photo = GetTableByID($pdo,'news','photo',$uId);
-  $descrition = explode('##',GetTableByID($pdo,'news','description',$uId));
+  $descrition = admin_split_description(GetTableByID($pdo,'news','description',$uId));
   $des = $descrition[0];
   $url =  GetTableByID($pdo,'news','urlVideo',$uId);
 }
@@ -82,37 +84,37 @@ if($currentPage=='modWriter.php'){
   $photo = GetTableByID($pdo,'writers','photo',$uId);
 }
 
-if($currentPage=='modOpinion.php'){
+if($currentPage=='modOpinion.php' && $uId !== null){
   $nomW = GetTableByID($pdo,'opinion','id_writer',$uId);
   $titre = GetTableByID($pdo,'opinion','titre',$uId);
   $description = GetTableByID($pdo,'opinion','description',$uId);
 }
 
-if($currentPage=='modInInfo.php'){
+if($currentPage=='modInInfo.php' && $uId !== null){
   $titre = GetTableByID($pdo,'caricature','titre',$uId);
   $photo = '../assets/img/infographics/'.GetTableByID($pdo,'caricature','photo',$uId);
 }
 
-//  if(loggedAdmin($pdo)){header("Location:index.php");}
-if(curPageName()=='seo.php'){
-  if($_GET['v'] =='cat'){
-    $titre = GetTableByID($pdo,'categories','name',$_GET['s']);
-    $keyWordSeo = GetTableByID($pdo,'categories','SeoKeywords',$_GET['s']);
-    $descSeo = GetTableByID($pdo,'categories','SeoDescription',$_GET['s']);
+if($currentPage=='seo.php' && $sId !== null){
+  $seoType = $_GET['v'] ?? '';
+  if($seoType =='cat'){
+    $titre = GetTableByID($pdo,'categories','name',$sId);
+    $keyWordSeo = GetTableByID($pdo,'categories','SeoKeywords',$sId);
+    $descSeo = GetTableByID($pdo,'categories','SeoDescription',$sId);
     $cat ='seoCat';
   }
 
-  if($_GET['v'] =='souscat'){
-    $titre = GetTableByID($pdo,'sous_categories','name',$_GET['s']);
-    $keyWordSeo = GetTableByID($pdo,'sous_categories','SeoKeywords',$_GET['s']);
-    $descSeo = GetTableByID($pdo,'sous_categories','SeoDescription',$_GET['s']);
+  if($seoType =='souscat'){
+    $titre = GetTableByID($pdo,'sous_categories','name',$sId);
+    $keyWordSeo = GetTableByID($pdo,'sous_categories','SeoKeywords',$sId);
+    $descSeo = GetTableByID($pdo,'sous_categories','SeoDescription',$sId);
     $cat ='seoSousCat';
   }
 
-  if($_GET['v'] =='news'){
-    $titre = GetTableByID($pdo,'news','titre',$_GET['s']);
-    $keyWordSeo = GetTableByID($pdo,'news','SeoKeywords',$_GET['s']);
-    $descSeo = GetTableByID($pdo,'news','SeoDescription',$_GET['s']);
+  if($seoType =='news'){
+    $titre = GetTableByID($pdo,'news','titre',$sId);
+    $keyWordSeo = GetTableByID($pdo,'news','SeoKeywords',$sId);
+    $descSeo = GetTableByID($pdo,'news','SeoDescription',$sId);
     $cat ='seoNews';
   }
 

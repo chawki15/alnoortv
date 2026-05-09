@@ -23,10 +23,14 @@ if($act=='addWriter'){
         echo " modWriter ";
     }
 }elseif($act=='addOpinions'){
-    if((trim($_POST['title'] ?? '')=='')||($_POST['selectNom'] ?? '') == ''||(trim($_POST['desc'] ?? '')=='')||(!validate_desarab($_POST['desc'] ?? ''))){
-        if($_POST['selectNom'] ?? '' == ''){echo " cl ";}    
-        if(trim($_POST['title'] ?? '')==''){ echo " et "; }
-        if(trim($_POST['desc'] ?? '')==''){ echo " ed "; }elseif(!validate_desarab($_POST['desc'] ?? '')){ echo " vd "; }
+    $title = trim($_POST['title'] ?? '');
+    $selectNom = $_POST['selectNom'] ?? '';
+    $desc = trim($_POST['desc'] ?? '');
+    
+    if($title == '' || $selectNom == '' || $desc == '' || !validate_desarab($desc)){
+        if($selectNom == ''){ echo " cl ";}  
+        if($title == ''){ echo " et "; }
+        if($desc == ''){ echo " ed "; }elseif(!validate_desarab($desc)){ echo " vd "; }
     }else{
         $stmt = $pdo->prepare('INSERT INTO opinion(id, id_writer, id_pseudo, titre, description, date) VALUES (NULL, :id_writer, :id_pseudo, :titre, :description, :date)');
         $stmt->execute([

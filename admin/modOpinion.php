@@ -28,7 +28,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                   <div class="card-body">
                     <form class="form form-horizontal" id="opinions">
                     <input type="hidden" name="act" value="modOpinions">
-                    <input type="hidden" name="id" value="<?php echo $_GET['u']; ?>">
+                    <input type="hidden" name="id" value="<?php echo htmlspecialchars((string)($uId ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
                       <div class="form-body">
                         <div class="row">
                           <div class="col-md-9">

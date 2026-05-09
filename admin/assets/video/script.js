@@ -1,6 +1,6 @@
 function readURL() {
   var oFile2 = document.getElementById("1").files[0];
-  var rFilter2 = /^(image\/jpeg|image\/jpg|image\/png)$/i;
+  var rFilter2 = /^(image\/webp|image\/jpeg|image\/jpg|image\/png)$/i;
   var FileSize = oFile2.size / 1024 / 1024;
 
   if (FileSize > 4.5) {

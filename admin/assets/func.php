@@ -67,15 +67,18 @@ function replace($str){
 	$s1 = str_replace('ٌ', '', str_replace('ُ', '', str_replace('ّ', '', str_replace('ِ', '', str_replace('؟', '', str_replace('“', '', str_replace('،', '', str_replace('”', '', str_replace(':', '', str_replace('!', '', $str)))))))))); 
     $s2 = str_replace(')', '',str_replace('(', '',str_replace('é', 'e',str_replace('à', 'a',str_replace(',', '',str_replace('"', '', str_replace('?', '', str_replace('.', '', str_replace(' ', '-', $s1)))))))));
     $s3 = str_replace(',', '', $s2);
-    return $s2;
+    return $s3;
 }
 
 
 function validate_desarab($str)
 {
-	$st = str_replace('/','',str_replace('<ul>','',str_replace('<li>','',str_replace('&rdquo;','',str_replace('</ul>','',str_replace('&nbsp;','',str_replace('</li>','',str_replace('<br>','',str_replace('<strong>','',str_replace('</strong>','',str_replace('<p>','',str_replace('</p>','',$str))))))))))));
-	$mask = '\n\r 0-9 -،.,?!:><”  ابتثجحخدذرزسشصضءيوهنملكقفغعظطآٱأإةؤئى"';
-	return preg_match('/^['.$mask.' ]+$/',$st);
+    $st = strip_tags($str);
+    $st = html_entity_decode($st, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $st = preg_replace('/\x{00A0}/u', ' ', $st);
+    $st = trim($st);
+
+    return preg_match('/\p{Arabic}/u', $st);
 }
 
 function validate_stringLong($str) 

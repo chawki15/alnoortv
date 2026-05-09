@@ -60,7 +60,8 @@
 
                       <input type="hidden" name="act" value="modVideo">
 
-                    <input type="hidden" name="id" value="<?php echo $_GET['u']; ?>">
+                    <input type="hidden" name="id" value="<?php echo htmlspecialchars((string)($uId ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+
 
                       <div class="form-body">
 

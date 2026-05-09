@@ -69,7 +69,7 @@
                               </div>
                             </div>
                             <div class="form-group row">
-                              <label class="col-md-2 label-control" for="eventRegInput2">عنوان الخبر</label>
+                              <label class="col-md-2 label-control" for="eventRegInput2">عنوان الفيديو</label>
                               <div class="col-md-10">
                                   <input type="text" id="titleVideo" class="form-control" maxlength="140" placeholder="عنوان الفيديو" name="titleVideo">
                                   <span class="invalid hint" id="checkTitleVideo"></span>
@@ -83,16 +83,16 @@
                               </div>
                             </div>
                             <div class="form-group row">
-                              <label class="col-md-2 label-control" for="eventRegInput2">صورة الخبر</label>
+                              <label class="col-md-2 label-control" for="eventRegInput2">صورة الفيديو</label>
                               <div class="col-md-10">
                                 <div class="list">
                                   <div class="group-image image-1">
-                                    <input name="1" onchange="readURL();" id="1" type="file" accept="image/jpeg,image/png">
+                                    <input name="1" onchange="readURL();" id="1" type="file" accept="image/webp,image/jpeg,image/png">
                                     <div id="progress-wrp">
                                       <div class="progress-bar"></div>
                                       <div class="status">0%</div>
                                     </div>
-                                    <div id="wn1">photo jpeg / jpg / png ... </div>
+                                    <div id="wn1">photo webp / jpeg / jpg / png ... </div>
                                     <div id="taille1">File size > 4.5 MB </div>
                                     <div id="whiteMax1">Ajouter photo avec 600*300</div>
                                     <div class="description" id="desc-1">
@@ -107,7 +107,7 @@
                               </div>
                             </div>
                             <div class="form-group row">
-                              <label class="col-md-2 label-control" for="eventRegInput2">عنوان الخبر</label>
+                              <label class="col-md-2 label-control" for="eventRegInput2">وصف الفيديو</label>
                               <div class="col-md-10">
                                 <textarea name="desc" id="desc"></textarea>
                                 <span class="invalid hint" id="checkDescription"></span>

@@ -35,7 +35,7 @@ data-open="click" data-menu="vertical-menu" data-col="2-columns">
                               <label class="col-md-2 label-control" for="eventRegInput2">اختر اسم الكاتب</label>
                               <div class="col-md-10">
                                 <select class="form-control" name="selectNom" id="selectNom">
-                                    <option value=" ">اسم الكاتب</option>
+                                    <option value="">اسم الكاتب</option>
                                     <?php 
                                         list($id,$nom,$photo) = GetAdminWriters($pdo);
                                         for($z=0;$z<sizeof($id);$z++)
