@@ -1,19 +1,36 @@
 <?php
   session_start();
   require_once('../admin/assets/func.php');
-  $db = connect();
+  $pdo = connect_pdo();
   $limit = 15;
-  $c = ' id_category ="'.$_POST['cat'].'"';
-  if($_POST['souscat'] == '0'){ $s = ''; }else{ $s = ' and id_sousCategory ="'. $_POST['souscat'].'"';}
-  $d = mysqli_fetch_array(mysqli_query($db,"SELECT COUNT(*) AS total FROM  news where id < ".$_POST['pageNo']." and ".$c." ".$s." ")); 
-  $total=$d['total'];
-  $sql = "select * from news where id < ".$_POST['pageNo']." and ".$c." ".$s."  order by id desc limit ".$limit."";
-  $query = mysqli_query($db,$sql);
-  if(mysqli_num_rows($query) > 0){
+$pageNo = isset($_POST['pageNo']) ? (int)$_POST['pageNo'] : 0;
+$cat = isset($_POST['cat']) ? (int)$_POST['cat'] : 0;
+$souscat = isset($_POST['souscat']) ? (int)$_POST['souscat'] : 0;
+$sousCategorySql = '';
+$params = [
+    ':pageNo' => $pageNo,
+    ':cat' => $cat,
+];
+
+if ($souscat !== 0) {
+    $sousCategorySql = ' AND id_sousCategory = :souscat';
+    $params[':souscat'] = $souscat;
+}
+
+$countStmt = $pdo->prepare("SELECT COUNT(*) AS total FROM news WHERE id < :pageNo AND id_category = :cat{$sousCategorySql}");
+$countStmt->execute($params);
+$d = $countStmt->fetch(PDO::FETCH_ASSOC);
+$total = (int)($d['total'] ?? 0);
+
+$stmt = $pdo->prepare("SELECT * FROM news WHERE id < :pageNo AND id_category = :cat{$sousCategorySql} ORDER BY id DESC LIMIT {$limit}");
+$stmt->execute($params);
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+if (count($rows) > 0) {
     $output = "";
-    while($row = mysqli_fetch_assoc($query)){
-         $last_id = $row["id"];
-         $url = cripter($row["id"],264).'-'.replace($row["titre"]).'.html';
+    foreach ($rows as $row) {
+        $last_id = $row["id"];
+        $url = cripter($row["id"],264).'-'.replace($row["titre"]).'.html';
         $date = HeureCh($row["date"]);
         $output .= "<article class='col-lg-4 col-md-4 col-sm-12 col-xs-12'>
         <div class='overlay card'>
@@ -55,12 +72,11 @@
         </div>
     </article>";
     }
-    $output .="<div id='pagination' style='vertical-align: top;text-align: center;clear: both;'>
+    $output .= "<div id='pagination' style='vertical-align: top;text-align: center;clear: both;'>
         <button  class='btn btn-outline-success ajaxbtn' data-id='{$last_id}'>المزيد</button>
     </div>";
     echo $output;
   }else{
       echo '';
   }
-  mysqli_close($db);
 ?>
