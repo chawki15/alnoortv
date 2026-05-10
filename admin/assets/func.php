@@ -628,21 +628,22 @@ function CountSousMenuByMenu($pdo,$ids)
 
 function GetAdminMenu($pdo)
 {
-     $id = []; $name = [];
-    if($pdo instanceof PDO){
+    $id = [];
+    $name = [];
+    if ($pdo instanceof PDO) {
         $q = $pdo->query('SELECT * FROM categories');
         while ($d = $q->fetch()) {
             $id[] = $d['id'];
             $name[] = $d['name'];
         }
-    }else{
-        $q = mysqli_query($pdo,'SELECT * FROM categories');
+    } else {
+        $q = mysqli_query($pdo, 'SELECT * FROM categories');
         while ($d = mysqli_fetch_array($q)) {
             $id[] = $d['id'];
             $name[] = $d['name'];
         }
     }
-    return array($id,$name);	
+    return array($id, $name);
 }
 
 /*------------ ADMIN ------------*/

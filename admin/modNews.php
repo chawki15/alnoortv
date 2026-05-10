@@ -39,38 +39,30 @@
                                 <select class="form-control" name="selectCategory" id="selectCategory">
                                   <option value="">اسم الفئة</option>
                                   <?php
+                                  $selectedCategoryId = (int)($cat ?? 0);
+                                  $selectedSousCategoryId = (int)($souscat ?? 0);
                                   list($id, $name) = GetAdminMenuNews($pdo);
                                   for ($i = 0; $i < sizeof($id); $i++) {
-                                    $f = CountSousMenuByMenu($pdo, $id[$i]);
-
+                                    $categoryId = (int)$id[$i];
+                                    $categoryName = htmlspecialchars((string)$name[$i], ENT_QUOTES, 'UTF-8');
+                                    $f = CountSousMenuByMenu($db, $categoryId);
                                     if ($f == 0) {
+                                      $isSelected = ($categoryId === $selectedCategoryId && $selectedSousCategoryId === 0);
                                   ?>
-                                      <option value="<?php echo $id[$i] . '#' ?>">
-                                        <font style="vertical-align: inherit;">
-                                          <font style="vertical-align: inherit;"><?php echo $name[$i] ?></font>
-                                        </font>
-                                      </option>
+                                      <option value="<?php echo $categoryId . '#' ?>" <?php if ($isSelected) { ?> selected="selected" <?php } ?>><?php echo $categoryName; ?></option>
                                       <?php
                                     } else {
-                                      list($idss, $idcats, $nom)  = GetSousMenuByMenu($pdo, $id[$i]);
+                                      list($idss, $idcats, $nom)  = GetSousMenuByMenu($db, $categoryId);
                                       for ($j = 0; $j < sizeof($idss); $j++) {
-                                        if ($idss[$j] == $souscat) {
+                                        $optionCategoryId = (int)$idcats[$j];
+                                        $optionSousCategoryId = (int)$idss[$j];
+                                        $optionName = htmlspecialchars($name[$i] . ' : ' . $nom[$j], ENT_QUOTES, 'UTF-8');
+                                        $isSelected = ($optionCategoryId === $selectedCategoryId && $optionSousCategoryId === $selectedSousCategoryId);
                                       ?>
-                                          <option value="<?php echo $idcats[$j] . '#' . $idss[$j] ?>" selected>
-                                            <font style="vertical-align: inherit;">
-                                              <font style="vertical-align: inherit;"><?php echo $name[$i] . ' : ' . $nom[$j]; ?></font>
-                                            </font>
-                                          </option>
-                                        <?php } else { ?>
-                                          <option value="<?php echo $idcats[$j] . '#' . $idss[$j] ?>">
-                                            <font style="vertical-align: inherit;">
-                                              <font style="vertical-align: inherit;"><?php echo $name[$i] . ' : ' . $nom[$j]; ?></font>
-                                            </font>
-                                          </option>
+                                        <option value="<?php echo $optionCategoryId . '#' . $optionSousCategoryId ?>" <?php if ($isSelected) { ?> selected="selected" <?php } ?>><?php echo $optionName; ?></option>
                                     <?php }
-                                      }
+                                    } 
                                     } ?>
-                                  <?php } ?>
                                 </select>
                                 <span class="invalid hint" id="checkSelectCat"></span>
                               </div>
