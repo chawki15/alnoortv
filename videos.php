@@ -15,15 +15,21 @@
 									</a>
 								</header>
 								<div class="loadData" style="margin-top: 5px;">
-									<?php 
-						$limit = 30;
-						$c = ' id_category ="'.$cat.'"';
-						if($nomsouscat != ''){ if($souscat == ''){ $s = ''; }else{ $s = ' and id_sousCategory ="'.$souscat.'"';} }else{ $s = ''; }
-						$sql = "select * from news where ".$c." ".$s." order by id desc limit ".$limit."";
-						$query = mysqli_query($db,$sql);
-						if(mysqli_num_rows($query) > 0){ 
-							while($row = mysqli_fetch_assoc($query)){
-								$last_id = $row["id"]; ?>
+								<?php 
+						            $limit = 30;
+									$params = [':cat' => (int)$cat];
+									$sousCategorySql = '';
+									if ($nomsouscat != '' && $souscat != '') {
+										$sousCategorySql = ' AND id_sousCategory = :souscat';
+										$params[':souscat'] = (int)$souscat;
+									}
+									$sql = "SELECT * FROM news WHERE id_category = :cat {$sousCategorySql} ORDER BY id DESC LIMIT {$limit}";
+									$stmt = $pdo->prepare($sql);
+									$stmt->execute($params);
+									$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+									if (count($rows) > 0) {
+										foreach ($rows as $row) {
+								        $last_id = $row["id"]; ?>
 									<article class="col-lg-4 col-md-4 col-sm-12 col-xs-12">
 										<div class="overlay card">
 											<div class="cover">

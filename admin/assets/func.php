@@ -95,7 +95,43 @@ function validate_stringDouble($str)
 {
 	
 	return preg_match('/^[a-zA-Z0-9\n\r ابتثجحخدذرزسشصضءيوهنملكقفغعظطآٱأإةؤئىàçéÔÎÛÂâêÊûîôè،.,?²!:<\/>\-+*_()\'&\"]+$/',$str);
-} 
+}
+
+function youtube_video_id($url)
+{
+    $url = trim((string)$url);
+    if ($url === '') {
+        return '';
+    }
+
+    $parts = parse_url($url);
+    if ($parts === false || empty($parts['host'])) {
+        return '';
+    }
+
+    $host = strtolower($parts['host']);
+    $host = preg_replace('/^www\./', '', $host);
+    $path = trim($parts['path'] ?? '', '/');
+    $videoId = '';
+
+    if ($host === 'youtu.be') {
+        $videoId = explode('/', $path)[0] ?? '';
+    } elseif (in_array($host, ['youtube.com', 'm.youtube.com', 'music.youtube.com'], true)) {
+        if ($path === 'watch') {
+            parse_str($parts['query'] ?? '', $query);
+            $videoId = (string)($query['v'] ?? '');
+        } elseif (preg_match('~^(?:embed|shorts|live)/([^/?#]+)~', $path, $matches)) {
+            $videoId = $matches[1];
+        }
+    }
+
+    return preg_match('/^[A-Za-z0-9_-]{6,}$/', $videoId) ? $videoId : '';
+}
+
+function youtube_embed_url($url)
+{
+    return youtube_video_id($url) !== '';
+}
 
 function valide_url($url)
 {
@@ -1134,4 +1170,29 @@ function update_news_photo_db_type_to_webp($pdo, $limit = 0)
     }
 
     return ['updated' => $updated, 'skipped' => $skipped, 'errors' => $errors];
+}
+
+function GetStories(PDO $pdo, int $limit = 12): array
+{
+    $stmt = $pdo->prepare('SELECT * FROM stories WHERE status = 1 ORDER BY position ASC, id DESC LIMIT :limit');
+    $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+    $stmt->execute();
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function GetAdminStories(PDO $pdo): array
+{
+    return $pdo->query('SELECT * FROM stories ORDER BY position ASC, id DESC')->fetchAll(PDO::FETCH_ASSOC);
+}
+
+function DeleteStory(PDO $pdo, int $id): void
+{
+    $stmt = $pdo->prepare('DELETE FROM stories WHERE id = :id');
+    $stmt->execute([':id' => $id]);
+}
+
+function ToggleStoryStatus(PDO $pdo, int $id): void
+{
+    $stmt = $pdo->prepare('UPDATE stories SET status = IF(status = 1, 0, 1) WHERE id = :id');
+    $stmt->execute([':id' => $id]);
 }

@@ -108,7 +108,7 @@ RewriteRule ^فيديو-برامج/?$ videos.php?cat=11&s=20 [L,QSA]
 
 RewriteRule ^news/([0-9]+)-([^/]+)\.html?$ news.php?n=$1 [L,QSA]
 RewriteRule ^video/([0-9]+)-([^/]+)\.html?$ video.php?v=$1 [L,QSA]
-RewriteRule ^opinion/([0-9]+)-([-_./a-zA-Z0-9،,ابتثجحخدذرزسشصضءيوهنملكقفغعظطآـــــاçÔÎÛÂâêÊûîôèèٱاًآأإةؤئى]+)\.html?$ opinion.php?o=$1 [L,QSA]
+RewriteRule ^opinion/([0-9]+)-([^/]+)\.html?$ opinion.php?o=$1 [L,QSA]
 
 RewriteRule ^chaine/?$ chaine.php [L,QSA]
 RewriteRule ^contact/?$ contact.php [L,QSA]

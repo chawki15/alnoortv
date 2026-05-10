@@ -523,14 +523,14 @@ showSuccessMessage("تم تعديل البيانات بنجاح", function(){ wi
       .then((result) => {
         if (result.isConfirmed) {
           $.ajax({
-            url: "assets/check/news.php",
+            url: "assets/check/video.php",
             type: "POST",
-            data: { id: id, act: "deleteNews" },
+            data: { id: id, act: "deleteVideo" },
             success: function (response) {
               swal.fire(
                 "تم الحذف"
               );
-              window.location = "./afficherNews.php";
+              window.location = "./afficherVideos.php";
             },
           });
         }
