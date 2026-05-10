@@ -1171,10 +1171,41 @@ function update_news_photo_db_type_to_webp($pdo, $limit = 0)
 
     return ['updated' => $updated, 'skipped' => $skipped, 'errors' => $errors];
 }
+function GetStoryColumns(PDO $pdo): array
+{
+    static $columns = null;
+
+    if ($columns !== null) {
+        return $columns;
+    }
+
+    $columns = [];
+    $stmt = $pdo->query('SHOW COLUMNS FROM `stories`');
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $column) {
+        if (isset($column['Field'])) {
+            $columns[$column['Field']] = true;
+        }
+    }
+
+    return $columns;
+}
+
+function StoryOrderByClause(PDO $pdo): string
+{
+    $columns = GetStoryColumns($pdo);
+
+    if (isset($columns['position'])) {
+        return 'position ASC, id DESC';
+    }
+
+    return 'id DESC';
+}
 
 function GetStories(PDO $pdo, int $limit = 12): array
 {
-    $stmt = $pdo->prepare('SELECT * FROM stories WHERE status = 1 ORDER BY position ASC, id DESC LIMIT :limit');
+    $columns = GetStoryColumns($pdo);
+    $where = isset($columns['status']) ? 'WHERE status = 1 ' : '';
+    $stmt = $pdo->prepare('SELECT * FROM stories ' . $where . 'ORDER BY ' . StoryOrderByClause($pdo) . ' LIMIT :limit');
     $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
     $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -1182,7 +1213,7 @@ function GetStories(PDO $pdo, int $limit = 12): array
 
 function GetAdminStories(PDO $pdo): array
 {
-    return $pdo->query('SELECT * FROM stories ORDER BY position ASC, id DESC')->fetchAll(PDO::FETCH_ASSOC);
+    return $pdo->query('SELECT * FROM stories ORDER BY ' . StoryOrderByClause($pdo))->fetchAll(PDO::FETCH_ASSOC);
 }
 
 function DeleteStory(PDO $pdo, int $id): void
@@ -1193,6 +1224,11 @@ function DeleteStory(PDO $pdo, int $id): void
 
 function ToggleStoryStatus(PDO $pdo, int $id): void
 {
+    $columns = GetStoryColumns($pdo);
+
+    if (!isset($columns['status'])) {
+        return;
+    }
     $stmt = $pdo->prepare('UPDATE stories SET status = IF(status = 1, 0, 1) WHERE id = :id');
     $stmt->execute([':id' => $id]);
 }
