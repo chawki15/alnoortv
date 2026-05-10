@@ -45,14 +45,14 @@
                                   for ($i = 0; $i < sizeof($id); $i++) {
                                     $categoryId = (int)$id[$i];
                                     $categoryName = htmlspecialchars((string)$name[$i], ENT_QUOTES, 'UTF-8');
-                                    $f = CountSousMenuByMenu($db, $categoryId);
+                                    $f = CountSousMenuByMenu($pdo, $categoryId);
                                     if ($f == 0) {
                                       $isSelected = ($categoryId === $selectedCategoryId && $selectedSousCategoryId === 0);
                                   ?>
                                       <option value="<?php echo $categoryId . '#' ?>" <?php if ($isSelected) { ?> selected="selected" <?php } ?>><?php echo $categoryName; ?></option>
                                       <?php
                                     } else {
-                                      list($idss, $idcats, $nom)  = GetSousMenuByMenu($db, $categoryId);
+                                      list($idss, $idcats, $nom)  = GetSousMenuByMenu($pdo, $categoryId);
                                       for ($j = 0; $j < sizeof($idss); $j++) {
                                         $optionCategoryId = (int)$idcats[$j];
                                         $optionSousCategoryId = (int)$idss[$j];
